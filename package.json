@@ -1,6 +1,5 @@
 {
   "name": "mimas",
-  "type": "module",
   "description": "A fun-fun-functional programming language with static checking, type inference, and parametric polymorphism that compiles to JavaScript",
   "version": "0.1.0",
   "main": "index.js",
