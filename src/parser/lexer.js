@@ -165,3 +165,5 @@ const tokens = {
   quest: "?",
   bang: "!",
 };
+
+export const lexer = moo.compile(tokens);
