@@ -1,8 +1,11 @@
-typeRepresentative["is" + info.variantName] = (x) =>
-  x && x.variant === info.variantName;
-import { assign } from "../object/assign.js";
-import { definePropWithOpts } from "../object/definePropWithOpts.js";
-import { freeze } from "../object/freeze.js";
+const {
+  assign,
+  definePropWithOpts,
+  freeze,
+  keys,
+  not,
+  includes,
+} = require("./utils");
 
 /**
  * @typedef {Object} VariantInfo The info used to construct a type variant
@@ -150,10 +153,6 @@ const createType = (
   return typeRepresentative;
 };
 
-import { keys } from "../object/keys.js";
-import { includes } from "../array/includes.js";
-import { not } from "../helpers/not.js";
-import { curry } from "../lambda/curry.js";
 /**
  *
  * @param {Object} typeRepresentative The type representative object for a type
