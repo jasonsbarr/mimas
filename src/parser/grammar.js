@@ -176,15 +176,17 @@ var grammar = {
     {"name": "program$ebnf$1", "symbols": []},
     {"name": "program$ebnf$1", "symbols": ["program$ebnf$1", "expression"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "program", "symbols": ["program$ebnf$1"]},
-    {"name": "expression", "symbols": ["expr", "expterm"]},
+    {"name": "expression$ebnf$1", "symbols": ["expterm"]},
+    {"name": "expression$ebnf$1", "symbols": ["expression$ebnf$1", "expterm"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "expression", "symbols": ["expr", "expression$ebnf$1"]},
     {"name": "expr", "symbols": ["atom"]},
     {"name": "atom", "symbols": ["symbol"]},
     {"name": "atom", "symbols": ["string"]},
     {"name": "atom", "symbols": ["number"]},
     {"name": "atom", "symbols": ["boolean"]},
     {"name": "atom", "symbols": ["nil"]},
-    {"name": "symbol", "symbols": [symbol]},
-    {"name": "string", "symbols": [string]},
+    {"name": "symbol", "symbols": [Symbol]},
+    {"name": "string", "symbols": [String]},
     {"name": "number", "symbols": [Number]},
     {"name": "number", "symbols": [Hexlit]},
     {"name": "number", "symbols": [Octlit]},
@@ -192,8 +194,12 @@ var grammar = {
     {"name": "boolean", "symbols": [True]},
     {"name": "boolean", "symbols": [False]},
     {"name": "nil", "symbols": [Nil]},
-    {"name": "expterm", "symbols": [Nl]},
-    {"name": "expterm", "symbols": [Semi]}
+    {"name": "expterm", "symbols": ["newline"]},
+    {"name": "expterm", "symbols": ["semi"]},
+    {"name": "expterm", "symbols": ["eof"]},
+    {"name": "newline", "symbols": [Nl]},
+    {"name": "semi", "symbols": [Semi]},
+    {"name": "eof", "symbols": [Eof]}
 ]
   , ParserStart: "program"
 }

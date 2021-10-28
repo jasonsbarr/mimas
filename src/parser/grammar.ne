@@ -170,7 +170,7 @@
 
 program -> expression:*
 
-expression -> expr expterm
+expression -> expr expterm:+
 
 expr ->
     atom
@@ -182,9 +182,9 @@ atom ->
   | boolean
   | nil
 
-symbol -> %symbol
+symbol -> %Symbol
 
-string -> %string
+string -> %String
 
 number ->
     %Number
@@ -199,5 +199,12 @@ boolean ->
 nil -> %Nil
 
 expterm ->
-    %Nl
-  | %Semi
+    newline
+  | semi
+  | eof
+
+newline -> %Nl
+
+semi -> %Semi
+
+eof -> %Eof
