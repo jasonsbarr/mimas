@@ -80,19 +80,29 @@ const readString = (raw) => {
 const tokens = {
   WS: /[ \t]/u,
   NL: { match: /\r?\n|\r/u, lineBreaks: true },
-  comment: /#.*?(\r?\n|\r)?$/u,
-  true: { match: /^true$/, value: () => true },
-  false: { match: /^false$/, value: () => false },
-  nil: { match: /^nil$/, value: () => null },
-  number: {
-    match: /^([1-9]\d*|0|[1-9]\d*\.|0\.|\.)\d*?([eE][+-]?\d+)?$/u,
-    value: (n) => Number(n),
-  },
+  comment: /#.*/u,
+  true: { match: /^true$/u, value: () => true },
+  false: { match: /^false$/u, value: () => false },
+  nil: { match: /^nil$/u, value: () => null },
+  number: [
+    {
+      match: /^[1-9]\d*|0|[1-9]\d*\.|0\.$/u,
+      value: (n) => Number(n),
+    },
+    {
+      match: /^[1-9]\d*\.|0\.\d+$/u,
+      value: (n) => Number(n),
+    },
+    {
+      match: /^[1-9]\d*\.|0\.\d+[eE][\+-]?\d+$/u,
+      value: (n) => Number(n),
+    },
+  ],
   hexlit: /0[xX][0-9a-fA-F]+/u,
-  octlit: /0[oO][0-7]+/,
-  binlit: /0[bB][01]+/,
+  octlit: /0[oO][0-7]+/u,
+  binlit: /0[bB][01]+/u,
   symbol: {
-    match: /[\p{L}_$][\p{LN}_$\?\!=-\*\/<>\+]*/u,
+    match: /[\p{L}_\$][\p{L}\p{N}_\$\?!=\+-<>=\*\/]*/u,
     type: moo.keywords(
       Object.fromEntries(
         [
@@ -120,12 +130,12 @@ const tokens = {
       )
     ),
   },
-  string: { match: /^\"(?:\\?+\s\S)*?\"$/u, value: (s) => readString(s) },
-  apply: "->",
+  string: { match: /"(?:.)*?"/u, value: (s) => readString(s) },
+  apply: /->/u,
   pipe: "|>",
   concat: "++",
   plus: "+",
-  minus: "-",
+  minus: /-/u,
   exp: "**",
   mul: "*",
   div: "/",

@@ -6,7 +6,9 @@
 
 program -> expression:*
 
-expression ->
+expression -> expr expterm
+
+expr ->
     atom
 
 atom ->
@@ -31,3 +33,7 @@ boolean ->
   | %false
 
 nil -> %nil
+
+expterm ->
+    %NL
+  | %semi
