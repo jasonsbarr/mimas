@@ -83,20 +83,17 @@ const tokens = {
   WS: /[ \t]/u,
   NL: { match: /\r?\n|\r/u, lineBreaks: true },
   comment: /#.*/u,
-  true: { match: /^true$/u, value: () => true },
-  false: { match: /^false$/u, value: () => false },
-  nil: { match: /^nil$/u, value: () => null },
   number: [
     {
-      match: /^[1-9]\d*|0|[1-9]\d*\.|0\.$/u,
+      match: /[1-9]\d*|0|[1-9]\d*\.|0\./u,
       value: (n) => Number(n),
     },
     {
-      match: /^[1-9]\d*\.|0\.\d+$/u,
+      match: /[1-9]\d*\.|0\.\d+/u,
       value: (n) => Number(n),
     },
     {
-      match: /^[1-9]\d*\.|0\.\d+[eE][\+-]?\d+$/u,
+      match: /[1-9]\d*\.|0\.\d+[eE][\+-]?\d+/u,
       value: (n) => Number(n),
     },
   ],
@@ -128,11 +125,17 @@ const tokens = {
           "begin",
           "do",
           "end",
+          "as",
+          "import",
         ].map((w) => [w, w])
       )
     ),
   },
+  true: { match: /true/u, value: () => true },
+  false: { match: /false/u, value: () => false },
+  nil: { match: /nil/u, value: () => null },
   string: { match: /".*"/u, value: (s) => readString(s) },
+  eof: { match: "<*endofinput*>", value: () => Symbol.for("end of input") },
   apply: /->/u,
   pipe: "|>",
   concat: "++",
@@ -179,6 +182,3 @@ const tokens = {
 };
 
 export const lexer = moo.compile(tokens);
-
-lexer.reset(String.raw`"hello \u0065"`);
-console.log([...lexer]);
