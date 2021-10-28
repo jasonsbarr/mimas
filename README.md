@@ -1,2 +1,3 @@
-# mimas
-A fun-fun-functional first programming language that compiles to JavaScript
+# Mimas
+
+A fun-fun-functional programming language with static checking, type inference, and parametric polymorphism that compiles to JavaScript

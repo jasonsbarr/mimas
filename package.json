@@ -1,4 +1,22 @@
 {
+  "name": "mimas",
+  "description": "A fun-fun-functional programming language with static checking, type inference, and parametric polymorphism that compiles to JavaScript",
+  "version": "0.1.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasonsbarr/mimas.git"
+  },
+  "author": "Jason Barr <jason@jasonsbarr.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jasonsbarr/mimas/issues"
+  },
+  "homepage": "https://github.com/jasonsbarr/mimas#readme",
   "dependencies": {
     "@jasonsbarr/functional-core": "^0.2.0",
     "moo": "^0.5.1",
