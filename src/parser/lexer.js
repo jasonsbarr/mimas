@@ -1,6 +1,6 @@
 import moo from "moo";
 
-const isHexadecimalChar = (ch) => /[0-9a-fA-F]/.test(ch);
+const isHexadecimalChar = (ch) => /^[0-9a-fA-F]$/.test(ch);
 
 /**
  *
@@ -17,11 +17,11 @@ const readString = (raw) => {
     while (pred(temp[i])) {
       str += temp[i++];
     }
-
     return str;
   };
 
   const readEscape = (ch) => {
+    console.log(ch);
     let str = "";
     let seq = "";
 
@@ -63,6 +63,7 @@ const readString = (raw) => {
 
   while (i < temp.length) {
     let ch = temp[i++];
+    escaped && console.log(escaped);
 
     if (escaped) {
       str += readEscape(ch);
@@ -74,6 +75,7 @@ const readString = (raw) => {
     }
   }
 
+  console.log(str.length);
   return str;
 };
 
@@ -130,7 +132,7 @@ const tokens = {
       )
     ),
   },
-  string: { match: /"(?:.)*?"/u, value: (s) => readString(s) },
+  string: { match: /".*"/u, value: (s) => readString(s) },
   apply: /->/u,
   pipe: "|>",
   concat: "++",
@@ -177,3 +179,6 @@ const tokens = {
 };
 
 export const lexer = moo.compile(tokens);
+
+lexer.reset(String.raw`"hello \u0065"`);
+console.log([...lexer]);
