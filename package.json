@@ -8,7 +8,8 @@
     "prettier": "^2.4.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "make:parser": "nearleyc src/parser/grammar.ne -o src/parser/grammar.js"
   },
   "repository": {
     "type": "git",

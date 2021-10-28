@@ -127,6 +127,7 @@ const tokens = {
           "end",
           "as",
           "import",
+          "open",
         ].map((w) => [w, w])
       )
     ),
@@ -134,6 +135,7 @@ const tokens = {
   true: { match: /true/u, value: () => true },
   false: { match: /false/u, value: () => false },
   nil: { match: /nil/u, value: () => null },
+  is: /is/u,
   string: { match: /".*"/u, value: (s) => readString(s) },
   eof: { match: "<*endofinput*>", value: () => Symbol.for("end of input") },
   apply: /->/u,
@@ -145,7 +147,7 @@ const tokens = {
   mul: "*",
   div: "/",
   intdiv: "//",
-  mod: "%",
+  rem: "%",
   rshift: ">>>",
   lshift: "<<<",
   bwxor: "^",
@@ -155,7 +157,7 @@ const tokens = {
   lt: "<",
   gt: ">",
   lte: "<=",
-  rte: ">=",
+  gte: ">=",
   eq: "==",
   ne: "!=",
   andop: "&&",
