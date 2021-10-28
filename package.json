@@ -4,7 +4,9 @@
   "description": "A fun-fun-functional programming language with static checking, type inference, and parametric polymorphism that compiles to JavaScript",
   "version": "0.1.0",
   "main": "index.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "prettier": "^2.4.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
