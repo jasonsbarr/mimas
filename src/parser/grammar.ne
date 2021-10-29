@@ -12,9 +12,9 @@
   const matchHexlit = match("hexlit");
   const matchOctlit = match("octlit");
   const matchBinlit = match("binlit");
-  const matchSymbol = match("symbol");
+  const matchIdentifier = match("identifier");
   const matchLet = match("let");
-  const matchRec = match("rec");
+  const matchLetrec = match("letrec");
   const matchIn = match("in");
   const matchAnd = match("and");
   const matchIf = match("if");
@@ -93,9 +93,9 @@
   const Hexlit = { test: t => matchHexlit(t) };
   const Octlit = { test: t => matchOctlit(t) };
   const Binlit = { test: t => matchBinlit(t) };
-  const Symbol = { test: t => matchSymbol(t) };
+  const Identifier = { test: t => matchIdentifier(t) };
   const Let = { test: t => matchLet(t) };
-  const Rec = { test: t => matchRec(t) };
+  const Letrec = { test: t => matchLetrec(t) };
   const In = { test: t => matchIn(t) };
   const And = { test: t => matchAnd(t) };
   const If = { test: t => matchIf(t) };
@@ -168,8 +168,8 @@
   const Bang = { test: t => matchBang(t) };
 
    // AST node constructors
-  const { Program } = require("../ast/ast");
-  const { point, first, last } = require("../lib/types/helpers");
+  import { Program, Number } from "../ast/ast";
+  import { point, first, last } from "../lib/types/helpers";
 
   const makeProgram = ([ data ]) => Program({
     node: "Program",
@@ -177,6 +177,11 @@
     start: point(first(data)),
     end: point(last(data))
   });
+
+  const makeNumber = (data) => {
+    console.log(data);
+    return data;
+  }
 %}
 
 program -> expression:*     {% makeProgram %}

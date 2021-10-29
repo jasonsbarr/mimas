@@ -2,6 +2,7 @@
   "name": "mimas",
   "description": "A fun-fun-functional programming language with static checking, type inference, and parametric polymorphism that compiles to JavaScript",
   "version": "0.1.0",
+  "type": "module",
   "main": "index.js",
   "devDependencies": {
     "prettier": "^2.4.1"

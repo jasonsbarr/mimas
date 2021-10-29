@@ -106,13 +106,13 @@ const tokens = {
   hexlit: { match: /0[xX][0-9a-fA-F_]+/u, value: (x) => parseInt(x, 16) },
   octlit: { match: /0[oO][0-7_]+/u, value: (x) => parseInt(x, 8) },
   binlit: { match: /0[bB][01_]+/u, value: (x) => parseInt(x, 2) },
-  symbol: {
+  identifier: {
     match: /[\p{L}_\$][\p{L}\p{N}_\$\?!=\+-<>=\*\/]*/u,
     type: moo.keywords(
       Object.fromEntries(
         [
           "let",
-          "rec",
+          "letrec",
           "in",
           "and",
           "if",

@@ -1,7 +1,7 @@
 const nearley = require("nearley");
-const lexer = require("./lexer");
-const grammar = require("./grammar");
 const { pipe } = require("../utils");
+const lexer = require("./lexer.js");
+const grammar = require("./grammar.js");
 
 const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
 const raw = (str) => String.raw`${str}`;
