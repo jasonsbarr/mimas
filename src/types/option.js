@@ -1,5 +1,5 @@
 const { ifElse, isFunction, isNullish } = require("../utils");
-const { VariantInfo, createType } = require("./createType.js");
+const { VariantInfo, createType } = require("./types.js");
 const {
   RightAlt,
   Applicative,
@@ -19,7 +19,7 @@ const {
   Monoid,
   RightFold,
   RightSemiGroup,
-} = require("./typeClasses.js");
+} = require("./classes");
 
 const variantInfos = [
   VariantInfo("Some", [

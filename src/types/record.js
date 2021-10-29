@@ -151,7 +151,7 @@ Object.setPrototypeOf(recordProto, null);
 // Note that values must be passed in the same order as the keys are defined,
 // and only the keys specified to the constructor constructor will get values
 // Keys can be either strings or symbols
-export const Record = (...recKeys) => {
+const Record = (...recKeys) => {
   const constructor = (...values) => {
     let record = create(recordProto);
 
@@ -202,8 +202,10 @@ Record.isRecord = (obj) =>
   typeof obj.isRecord === "function" && obj.isRecord() === true;
 
 // create ad-hoc records
-export const record = (object) => {
+const record = (object) => {
   const keys = Object.keys(object);
   const constructor = Record(...keys);
   return constructor.of(object);
 };
+
+module.exports = { Record, record };
