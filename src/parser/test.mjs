@@ -1,4 +1,4 @@
-const parse = require("./parser");
+import parse from "./parser.js";
 
 const code = `1
 2
