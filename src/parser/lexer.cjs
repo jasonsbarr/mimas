@@ -106,6 +106,10 @@ const tokens = {
   hexlit: { match: /0[xX][0-9a-fA-F_]+/u, value: (x) => parseInt(x, 16) },
   octlit: { match: /0[oO][0-7_]+/u, value: (x) => parseInt(x, 8) },
   binlit: { match: /0[bB][01_]+/u, value: (x) => parseInt(x, 2) },
+  true: { match: /true/u, value: () => true },
+  false: { match: /false/u, value: () => false },
+  nil: { match: /nil/u, value: () => null },
+  is: /is/u,
   identifier: {
     match: /[\p{L}_\$][\p{L}\p{N}_\$\?!=\+-<>=\*\/]*/u,
     type: moo.keywords(
@@ -138,10 +142,6 @@ const tokens = {
       )
     ),
   },
-  true: { match: /true/u, value: () => true },
-  false: { match: /false/u, value: () => false },
-  nil: { match: /nil/u, value: () => null },
-  is: /is/u,
   string: [
     { match: /"""[\s\S]*"""/u, value: (s) => readString(s).slice(2, -2) },
     { match: /@".*"@/u, value: (s) => String.raw`${s}`.slice(2, -2) },
@@ -193,6 +193,4 @@ const tokens = {
   bang: "!",
 };
 
-const lexer = moo.compile(tokens);
-
-module.exports = lexer;
+module.exports = moo.compile(tokens);

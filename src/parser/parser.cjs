@@ -1,7 +1,7 @@
 const nearley = require("nearley");
-const { pipe } = require("../utils");
-const lexer = require("./lexer.js");
-const grammar = require("./grammar.js");
+const { pipe } = require("./helpers.cjs");
+const lexer = require("./lexer.cjs");
+const grammar = require("./grammar.cjs");
 
 const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
 const raw = (str) => String.raw`${str}`;
@@ -13,6 +13,4 @@ const lex = (input) => [...lexer.reset(input)].filter((t) => t.type !== "WS");
 
 const feed = (tokens) => parser.feed(tokens);
 
-const parse = (code) => pipe(code, raw, eof, lex, feed).results;
-
-module.exports = parse;
+module.exports = (code) => pipe(code, raw, eof, lex, feed).results;

@@ -167,58 +167,52 @@
   const Quest = { test: t => matchQuest(t) };
   const Bang = { test: t => matchBang(t) };
 
-   // AST node constructors
-  import { Program, Number } from "../ast/ast";
-  import { point, first, last } from "../lib/types/helpers";
-
-  const makeProgram = ([ data ]) => Program({
-    node: "Program",
-    prog: data,
-    start: point(first(data)),
-    end: point(last(data))
-  });
-
-  const makeNumber = (data) => {
-    console.log(data);
-    return data;
-  }
+  // AST node constructors
+  const {
+    Program,
+    NumberN,
+    StringN,
+    BooleanN,
+    NilN,
+    Var
+  } = require("./nodes.cjs");
 %}
 
-program -> expression:*     {% makeProgram %}
+program -> expression:*             {% Program %}
 
 expression ->
-    expr expterm:+          {% ([ data ]) => data %}
+    expr expterm:+                  {% ([ data ]) => data %}
 
 expr ->
-    atom                    {% id %}
+    atom                            {% id %}
 
 atom ->
-    symbol                  {% id %}
-  | string                  {% id %}
-  | number                  {% id %}
-  | boolean                 {% id %}
-  | nil                     {% id %}
+    identifier                      {% Var %}
+  | string                          {% StringN %}
+  | number                          {% NumberN %}
+  | boolean                         {% BooleanN %}
+  | nil                             {% NilN %}
 
-symbol -> %Symbol           {% id %}
+identifier -> %Identifier           {% id %}
 
-string -> %String           {% id %}
+string -> %String                   {% id %}
 
 number ->
-    %Number                 {% id %}
-  | %Hexlit                 {% id %}
-  | %Octlit                 {% id %}
-  | %Binlit                 {% id %}
+    %Number                         {% id %}
+  | %Hexlit                         {% id %}
+  | %Octlit                         {% id %}
+  | %Binlit                         {% id %}
 
 boolean ->
-    %True                   {% id %}
-  | %False                  {% id %}
+    %True                           {% id %}
+  | %False                          {% id %}
 
-nil -> %Nil                 {% id %}
+nil -> %Nil                         {% id %}
 
 expterm ->
-    newline                 {% id %}
-  | semi                    {% id %}
-  | eof                     {% id %}
+    newline                         {% id %}
+  | semi                            {% id %}
+  | eof                             {% id %}
 
 newline -> %Nl
 

@@ -171,37 +171,31 @@ function id(x) { return x[0]; }
   const Quest = { test: t => matchQuest(t) };
   const Bang = { test: t => matchBang(t) };
 
-   // AST node constructors
-  import { Program, Number } from "../ast/ast";
-  import { point, first, last } from "../lib/types/helpers";
-
-  const makeProgram = ([ data ]) => Program({
-    node: "Program",
-    prog: data,
-    start: point(first(data)),
-    end: point(last(data))
-  });
-
-  const makeNumber = (data) => {
-    console.log(data);
-    return data;
-  }
+  // AST node constructors
+  const {
+    Program,
+    NumberN,
+    StringN,
+    BooleanN,
+    NilN,
+    Var
+  } = require("./nodes.cjs");
 var grammar = {
     Lexer: undefined,
     ParserRules: [
     {"name": "program$ebnf$1", "symbols": []},
     {"name": "program$ebnf$1", "symbols": ["program$ebnf$1", "expression"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "program", "symbols": ["program$ebnf$1"], "postprocess": makeProgram},
+    {"name": "program", "symbols": ["program$ebnf$1"], "postprocess": Program},
     {"name": "expression$ebnf$1", "symbols": ["expterm"]},
     {"name": "expression$ebnf$1", "symbols": ["expression$ebnf$1", "expterm"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "expression", "symbols": ["expr", "expression$ebnf$1"], "postprocess": ([ data ]) => data},
     {"name": "expr", "symbols": ["atom"], "postprocess": id},
-    {"name": "atom", "symbols": ["symbol"], "postprocess": id},
-    {"name": "atom", "symbols": ["string"], "postprocess": id},
-    {"name": "atom", "symbols": ["number"], "postprocess": id},
-    {"name": "atom", "symbols": ["boolean"], "postprocess": id},
-    {"name": "atom", "symbols": ["nil"], "postprocess": id},
-    {"name": "symbol", "symbols": [Symbol], "postprocess": id},
+    {"name": "atom", "symbols": ["identifier"], "postprocess": Var},
+    {"name": "atom", "symbols": ["string"], "postprocess": StringN},
+    {"name": "atom", "symbols": ["number"], "postprocess": NumberN},
+    {"name": "atom", "symbols": ["boolean"], "postprocess": BooleanN},
+    {"name": "atom", "symbols": ["nil"], "postprocess": NilN},
+    {"name": "identifier", "symbols": [Identifier], "postprocess": id},
     {"name": "string", "symbols": [String], "postprocess": id},
     {"name": "number", "symbols": [Number], "postprocess": id},
     {"name": "number", "symbols": [Hexlit], "postprocess": id},
