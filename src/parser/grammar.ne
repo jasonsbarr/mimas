@@ -171,14 +171,12 @@
   const { Program } = require("../ast/ast");
   const { point, first, last } = require("../lib/types/helpers");
 
-  const makeProgram = ([ data ]) => {
-    return Program({
-      node: "Program",
-      prog: data,
-      start: point(first(data)),
-      end: point(last(data))
-    });
-  };
+  const makeProgram = ([ data ]) => Program({
+    node: "Program",
+    prog: data,
+    start: point(first(data)),
+    end: point(last(data))
+  });
 %}
 
 program -> expression:*     {% makeProgram %}
