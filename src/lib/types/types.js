@@ -98,11 +98,18 @@ const createVariantConstructor = (typeName, variantInfo) => {
   };
 
   // assign statics to constructor
-  for (let className of variantInfo.statics.sTypeClasses) {
-    variantConstructor = assign(variantConstructor, className);
+  if (variantInfo.statics && variantInfo.statics.sTypeClasses) {
+    for (let className of variantInfo.statics.sTypeClasses) {
+      variantConstructor = assign(variantConstructor, className);
+    }
   }
 
-  variantConstructor = assign(variantConstructor, variantInfo.statics.methods);
+  if (variantInfo.statics && variantInfo.statics.sTypeClasses) {
+    variantConstructor = assign(
+      variantConstructor,
+      variantInfo.statics.methods
+    );
+  }
 
   return variantConstructor;
 };

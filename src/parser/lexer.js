@@ -21,7 +21,6 @@ const readString = (raw) => {
   };
 
   const readEscape = (ch) => {
-    console.log(ch);
     let str = "";
     let seq = "";
 
@@ -63,7 +62,6 @@ const readString = (raw) => {
 
   while (i < temp.length) {
     let ch = temp[i++];
-    escaped && console.log(escaped);
 
     if (escaped) {
       str += readEscape(ch);
