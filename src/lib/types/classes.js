@@ -1,4 +1,4 @@
-const { concatValues, equals, identity, eq } = require("../utils");
+const { concatValues, equals, identity, eq } = require("../../utils");
 
 // Right typeclasses
 exports.Fold = {

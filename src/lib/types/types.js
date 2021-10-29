@@ -6,7 +6,7 @@ const {
   not,
   includes,
   curry,
-} = require("../utils");
+} = require("../../utils");
 
 /**
  * @typedef {Object} VariantInfo The info used to construct a type variant

@@ -11,9 +11,9 @@ const {
   create,
   toQueryString,
   concatValues,
-} = require("../utils");
+} = require("../../utils");
 
-const { Option } = require("../types/option");
+const { Option } = require("./option");
 
 const recordProto = {
   // returns a Record with the same keys but all values set to undefined

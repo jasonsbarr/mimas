@@ -1,5 +1,5 @@
-const { VariantInfo, createType } = require("../types/types");
-const { Record } = require("../types/record");
+const { VariantInfo, createType } = require("../lib/types/types");
+const { Record } = require("../lib/types/record");
 
 const variantInfos = [VariantInfo("Program", [], {})];
 

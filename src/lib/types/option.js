@@ -1,4 +1,4 @@
-const { ifElse, isFunction, isNullish } = require("../utils");
+const { ifElse, isFunction, isNullish } = require("../../utils");
 const { VariantInfo, createType } = require("./types.js");
 const {
   RightAlt,
