@@ -1,20 +1,6 @@
+const objectHash = require("object-hash");
+
 exports.pipe = (val, ...fns) => fns.reduce((v, fn) => fn(v), val);
-
-exports.assign = (target, ...sources) => Object.assign(target, ...sources);
-
-exports.definePropWithOpts = (
-  prop,
-  obj,
-  { writable = true, configurable = true, enumerable = true, value = null } = {}
-) =>
-  Object.defineProperty(obj, prop, {
-    writable,
-    configurable,
-    enumerable,
-    value,
-  });
-
-exports.freeze = (obj) => Object.freeze(obj);
 
 const _isPlaceholder = (a) => {
   return (
@@ -142,26 +128,51 @@ const _curryN = (length, received, fn) => {
   };
 };
 
-exports.curryN = _curry2(function curryN(length, fn) {
+const curryN = _curry2(function curryN(length, fn) {
   if (length === 1) {
     return _curry1(fn);
   }
   return _arity(length, _curryN(length, [], fn));
 });
 
-exports.curry = _curry1(function curry(fn) {
+exports.curryN = curryN;
+
+const curry = _curry1(function curry(fn) {
   return curryN(fn.length, fn);
 });
 
-exports.keys = (obj) => Object.keys(obj);
+exports.curry = curry;
 
-exports.includes = curry((value, arr) => arr.includes(value));
+exports.assign = (target, ...sources) => Object.assign(target, ...sources);
+
+exports.definePropWithOpts = (
+  prop,
+  obj,
+  { writable = true, configurable = true, enumerable = true, value = null } = {}
+) =>
+  Object.defineProperty(obj, prop, {
+    writable,
+    configurable,
+    enumerable,
+    value,
+  });
+
+exports.freeze = (obj) => Object.freeze(obj);
+
+const keys = (obj) => Object.keys(obj);
+
+exports.keys = keys;
+
+const includes = curry((value, arr) => arr.includes(value));
+exports.includes = includes;
 
 exports.not = (bool) => !bool;
 
-exports.isNil = (obj) => obj == null;
+const isNil = (obj) => obj == null;
 
-exports.concatValues = (value1, value2) => {
+exports.isNil = isNil;
+
+const concatValues = (value1, value2) => {
   if (
     typeof value1 === "string" ||
     typeof value1 === "number" ||
@@ -179,7 +190,9 @@ exports.concatValues = (value1, value2) => {
   return value1.concat(value2);
 };
 
-exports.equals = (a, b) => {
+exports.concatValues = concatValues;
+
+const equals = (a, b) => {
   if (a === b) return true;
 
   if (a && b && typeof a == "object" && typeof b == "object") {
@@ -241,6 +254,223 @@ exports.equals = (a, b) => {
   return a !== a && b !== b;
 };
 
+exports.equals = equals;
+
 exports.identity = (x) => x;
 
 exports.eq = curry((v1, v2) => equals(v1, v2));
+
+exports.hash = (obj) => objectHash(obj);
+
+exports.ifElse = curry((pred, ifCase, elseCase, value) =>
+  pred(value) ? ifCase(value) : elseCase(value)
+);
+
+exports.isNullish = (obj) => obj == null || Number.isNaN(obj);
+
+const property = (obj, key) => Object.getOwnPropertyDescriptor(obj, key);
+
+exports.property = property;
+
+const defineProperty = (target, key, source) =>
+  Object.defineProperty(target, key, source);
+
+exports.defineProperty = defineProperty;
+
+const symbols = (obj) => Object.getOwnPropertySymbols(obj);
+
+exports.symbols = symbols;
+
+exports.extend = (target, ...sources) => {
+  sources.forEach((source) => {
+    keys(source).forEach((key) => {
+      if (key === "prototype") {
+        target[key] = source[key];
+      } else {
+        defineProperty(target, key, property(source, key));
+      }
+    });
+    symbols(source).forEach((symbol) => {
+      defineProperty(target, symbol, property(source, symbol));
+    });
+  });
+  return target;
+};
+
+const entries = (obj) => Object.entries(obj);
+exports.entries = entries;
+
+const values = (obj) => Object.values(obj);
+
+exports.values = values;
+
+const isMap = (obj) => obj instanceof Map;
+exports.isMap = isMap;
+
+const isSet = (obj) => obj instanceof Set;
+exports.isSet = isSet;
+
+const names = (obj) => Object.getOwnPropertyNames(obj);
+exports.names = names;
+
+const isArray = (obj) => Array.isArray(obj);
+exports.isArray = isArray;
+
+const isDate = (obj) => obj instanceof Date;
+exports.isDate = isDate;
+
+const isRegExp = (obj) => obj instanceof RegExp;
+exports.isRegExp = isRegExp;
+
+const isObject = (obj) =>
+  !isNil(obj) &&
+  typeof obj === "object" &&
+  !isMap(obj) &&
+  !isSet(obj) &&
+  !isRegExp(obj) &&
+  !isDate(obj) &&
+  !isArray(obj);
+
+exports.isObject = isObject;
+
+const copyProto = curry((source, target) => setProto(source.__proto__, target));
+exports.copyProto = copyProto;
+
+const setProto = curry((source, target) =>
+  Object.setPrototypeOf(target, source)
+);
+exports.setProto = setProto;
+
+// helper functions for clone
+const getValue = (key, obj) => {
+  let value = obj[key];
+  let result;
+
+  if (isMap(value)) {
+    result = cloneMap(value);
+  }
+  if (isSet(value)) {
+    result = cloneSet(value);
+  }
+  if (isArray(value)) {
+    result = cloneArray(value);
+  } else if (isDate(value)) {
+    result = new Date(value.getTime());
+  } else if (isRegExp(value)) {
+    result = RegExp(value.source, getRegExpFlags(value));
+  } else if (isObject(value)) {
+    result = clone(value);
+  } else {
+    // is primitive or function
+    result = value;
+  }
+  return result;
+};
+
+const cloneArray = (arr) => {
+  let result = [];
+  for (let value of obj) {
+    result.push(clone(value));
+  }
+  return result;
+};
+
+const cloneMap = (map) => {
+  let result = new Map();
+  for (let [key, _] of map.entries()) {
+    result.set(key, clone(map.get(key)));
+  }
+  return result;
+};
+
+const cloneSet = (set) => {
+  let result = new Set();
+  for (let value of set.values()) {
+    result.add(clone(value));
+  }
+  return result;
+};
+
+// stolen from https://github.com/angus-c/just/blob/master/packages/collection-clone/index.js
+const getRegExpFlags = (regExp) => {
+  if (typeof regExp.source.flags == "string") {
+    return regExp.source.flags;
+  } else {
+    var flags = [];
+    regExp.global && flags.push("g");
+    regExp.ignoreCase && flags.push("i");
+    regExp.multiline && flags.push("m");
+    regExp.sticky && flags.push("y");
+    regExp.unicode && flags.push("u");
+    return flags.join("");
+  }
+};
+
+const clone = (obj) => {
+  let result = isArray(obj)
+    ? []
+    : isMap(obj)
+    ? new Map()
+    : isSet(obj)
+    ? new Set()
+    : isDate(obj)
+    ? new Date(obj.getTime())
+    : isRegExp(obj)
+    ? new RegExp(obj.source, getRegExpFlags(obj))
+    : isObject(obj)
+    ? Object.create(null)
+    : // is primitive
+      obj;
+  if (isMap(obj)) {
+    for (let [key, _] of obj.entries()) {
+      result.set(key, clone(obj.get(key)));
+    }
+  } else if (isSet(obj)) {
+    for (let value of obj.values()) {
+      result.add(clone(value));
+    }
+  } else if (isArray(obj)) {
+    result = cloneArray(obj);
+  } else if (isDate(obj)) {
+    result = new Date(obj.getTime());
+  } else if (isRegExp(obj)) {
+    result = new RegExp(obj.source, getRegExpFlags(obj));
+  } else if (isObject(obj)) {
+    // is actual object, not null
+    for (let key of names(obj)) {
+      result[key] = getValue(key, obj);
+    }
+    for (let key of symbols(obj)) {
+      result[key] = getValue(key, obj);
+    }
+    // set proto because I used Object.create(null) above
+    copyProto(obj, result);
+  } else {
+    // obj is a primitive value or function
+    result = obj;
+  }
+  return result;
+};
+
+exports.clone = clone;
+
+const freeze = (obj) => Object.freeze(obj);
+exports.freeze = freeze;
+
+const create = (proto) => Object.create(proto);
+exports.create = create;
+
+const toQueryString = (obj) => {
+  let qStr = "";
+  let i = 0;
+  for (let [k, v] of entries(obj)) {
+    qStr += encodeURI(k) + "=" + encodeURI(v);
+    if (lt(i, length(entries(obj)) - 1)) {
+      qStr += "&";
+    }
+    i++;
+  }
+  return qStr;
+};
+
+exports.toQueryString = toQueryString;
