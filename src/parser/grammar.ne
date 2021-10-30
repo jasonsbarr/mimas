@@ -13,8 +13,9 @@
   const matchOctlit = match("octlit");
   const matchBinlit = match("binlit");
   const matchIdentifier = match("identifier");
+  const matchDef = match("def");
   const matchLet = match("let");
-  const matchLetrec = match("letrec");
+  const matchRec = match("rec");
   const matchIn = match("in");
   const matchAnd = match("and");
   const matchIf = match("if");
@@ -66,6 +67,7 @@
   const matchNe = match("ne");
   const matchAndop = match("andop");
   const matchOr = match("or");
+  const matchNc = match("nc");
   const matchLparen = match("lparen");
   const matchRparen = match("rparen");
   const matchLbracket = match("lbracket");
@@ -94,8 +96,9 @@
   const Octlit = { test: t => matchOctlit(t) };
   const Binlit = { test: t => matchBinlit(t) };
   const Identifier = { test: t => matchIdentifier(t) };
+  const Def = { test: t => matchDef(t) };
   const Let = { test: t => matchLet(t) };
-  const Letrec = { test: t => matchLetrec(t) };
+  const Rec = { test: t => matchRec(t) };
   const In = { test: t => matchIn(t) };
   const And = { test: t => matchAnd(t) };
   const If = { test: t => matchIf(t) };
@@ -147,6 +150,7 @@
   const Ne = { test: t => matchNe(t) };
   const Andop = { test: t => matchAndop(t) };
   const Or = { test: t => matchOr(t) };
+  const Nc = { test: t => matchNc(t) };
   const Lparen = { test: t => matchLparen(t) };
   const Rparen = { test: t => matchRparen(t) };
   const Lbracket = { test: t => matchLbracket(t) };
@@ -174,48 +178,122 @@
     StringN,
     BooleanN,
     NilN,
-    Var
+    Var,
+    Parenthesize,
+    BinOp,
+    VarDecl
   } = require("./nodes.cjs");
 %}
 
-program -> expression:*             {% Program %}
+program -> expterm:* expression:*                                                                                   {% Program %}
 
 expression ->
-    expr expterm:+                  {% ([ data ]) => data %}
+    expr expterm:*                                                                                                 {% ([data]) => data %}
 
 expr ->
-    atom                            {% id %}
+    binOp                                                                                                           {% id %}
+  | atom                                                                                                            {% id %}
+#   | variableDeclaration                                                                                             {% id %}
+
+# variableDeclaration ->
+#     let identifier bind expression                                                                                  {% VarDecl %}
+
+# let -> %Let                                                                                                         {% id %}
+# def -> %Def                                                                                                         {% id %}
+
+binOp ->
+    expOp                                                                                                           {% id %}
+  | mulOp                                                                                                           {% id %}
+  | plusOp                                                                                                          {% id %}
+  | shiftOp                                                                                                         {% id %}
+  | compareOp                                                                                                       {% id %}
+  | eqOp                                                                                                            {% id %}
+  | bwandOp                                                                                                         {% id %}
+  | bwxorOp                                                                                                         {% id %}
+  | bworOp
+
+ncOp -> orOp (nc) ncOp                                                                                              {% BinOp %}
+  | orOp                                                                                                            {% id %}
+orOp -> andoper (or) orOp                                                                                           {% BinOp %}
+  | andoper                                                                                                         {% id %}
+andoper -> bworOp (andop) andoper                                                                                   {% BinOp %}
+  | bworOp                                                                                                          {% id %}
+bworOp -> bwxorOp (bwor) bworOp                                                                                     {% BinOp %}
+  | bwxorOp                                                                                                         {% id %}
+bwxorOp -> bwandOp (bwxor) bwxorOp                                                                                  {% BinOp %}
+  | bwandOp                                                                                                         {% id %}
+bwandOp -> eqOp (bwand) bwandOp                                                                                     {% BinOp %}
+  | eqOp                                                                                                            {% id %}
+eqOp -> compareOp (eq|ne) eqOp                                                                                      {% BinOp %}
+  | compareOp                                                                                                       {% id %}
+compareOp -> shiftOp (lt|gt|lte|gte|in) compareOp                                                                   {% BinOp %}
+  | shiftOp                                                                                                         {% id %}
+shiftOp -> plusOp (lshift|rshift) shiftOp                                                                           {% BinOp %}
+  | plusOp                                                                                                          {% id %}
+plusOp -> mulOp (plus|minus) plusOp                                                                                 {% BinOp %}
+  | mulOp                                                                                                           {% id %}
+mulOp -> expOp (mul|div|rem) mulOp                                                                                  {% BinOp %}
+  | expOp                                                                                                           {% id %}
+expOp -> atom exp expOp                                                                                             {% BinOp %}
+  | atom                                                                                                            {% id %}
+
+bind -> %Bind                                                                                                       {% id %}
+nc -> %Nc                                                                                                           {% id %}
+or -> %Or                                                                                                           {% id %}
+andop -> %Andop                                                                                                     {% id %}
+bwor -> %Bwor                                                                                                       {% id %}
+bwxor -> %Bwxor                                                                                                     {% id %}
+bwand -> %Bwand                                                                                                     {% id %}
+eq -> %Eq                                                                                                           {% id %}
+ne -> %Ne                                                                                                           {% id %}
+lt -> %Lt                                                                                                           {% id %}
+gt -> %Gt                                                                                                           {% id %}
+lte -> %Lte                                                                                                         {% id %}
+gte -> %Gte                                                                                                         {% id %}
+in -> %In                                                                                                           {% id %}
+lshift -> %Lshift                                                                                                   {% id %}
+rshift -> %Rshift                                                                                                   {% id %}
+plus -> %Plus                                                                                                       {% id %}
+minus -> %Minus                                                                                                     {% id %}
+mul -> %Mul                                                                                                         {% id %}
+div -> %Div                                                                                                         {% id %}
+rem -> %Rem                                                                                                         {% id %}
+exp -> %Exp                                                                                                         {% id %}
 
 atom ->
-    identifier                      {% Var %}
-  | string                          {% StringN %}
-  | number                          {% NumberN %}
-  | boolean                         {% BooleanN %}
-  | nil                             {% NilN %}
+    identifier                                                                                                      {% id %}
+  | string                                                                                                          {% id %}
+  | number                                                                                                          {% id %}
+  | boolean                                                                                                         {% id %}
+  | nil                                                                                                             {% id %}
+  | lparen expr rparen                                                                                              {% Parenthesize %}
 
-identifier -> %Identifier           {% id %}
+identifier -> %Identifier                                                                                           {% Var %}
 
-string -> %String                   {% id %}
+string -> %String                                                                                                   {% StringN %}
 
 number ->
-    %Number                         {% id %}
-  | %Hexlit                         {% id %}
-  | %Octlit                         {% id %}
-  | %Binlit                         {% id %}
+    %Number                                                                                                         {% NumberN %}
+  | %Hexlit                                                                                                         {% NumberN %}
+  | %Octlit                                                                                                         {% NumberN %}
+  | %Binlit                                                                                                         {% NumberN %}
 
 boolean ->
-    %True                           {% id %}
-  | %False                          {% id %}
+    %True                                                                                                           {% BooleanN %}
+  | %False                                                                                                          {% BooleanN %}
 
-nil -> %Nil                         {% id %}
+nil -> %Nil                                                                                                         {% NilN %}
+
+lparen -> %Lparen                                                                                                   {% id %}
+rparen -> %Rparen                                                                                                   {% id %}
 
 expterm ->
-    newline                         {% id %}
-  | semi                            {% id %}
-  | eof                             {% id %}
+    newline                                                                                                         {% id %}
+  | semi                                                                                                            {% id %}
+  | eof                                                                                                             {% id %}
 
-newline -> %Nl
+newline -> %Nl                                                                                                      {% id %}
 
-semi -> %Semi
+semi -> %Semi                                                                                                       {% id %}
 
-eof -> %Eof
+eof -> %Eof                                                                                                         {% id %}

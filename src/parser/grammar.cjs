@@ -17,8 +17,9 @@ function id(x) { return x[0]; }
   const matchOctlit = match("octlit");
   const matchBinlit = match("binlit");
   const matchIdentifier = match("identifier");
+  const matchDef = match("def");
   const matchLet = match("let");
-  const matchLetrec = match("letrec");
+  const matchRec = match("rec");
   const matchIn = match("in");
   const matchAnd = match("and");
   const matchIf = match("if");
@@ -70,6 +71,7 @@ function id(x) { return x[0]; }
   const matchNe = match("ne");
   const matchAndop = match("andop");
   const matchOr = match("or");
+  const matchNc = match("nc");
   const matchLparen = match("lparen");
   const matchRparen = match("rparen");
   const matchLbracket = match("lbracket");
@@ -98,8 +100,9 @@ function id(x) { return x[0]; }
   const Octlit = { test: t => matchOctlit(t) };
   const Binlit = { test: t => matchBinlit(t) };
   const Identifier = { test: t => matchIdentifier(t) };
+  const Def = { test: t => matchDef(t) };
   const Let = { test: t => matchLet(t) };
-  const Letrec = { test: t => matchLetrec(t) };
+  const Rec = { test: t => matchRec(t) };
   const In = { test: t => matchIn(t) };
   const And = { test: t => matchAnd(t) };
   const If = { test: t => matchIf(t) };
@@ -151,6 +154,7 @@ function id(x) { return x[0]; }
   const Ne = { test: t => matchNe(t) };
   const Andop = { test: t => matchAndop(t) };
   const Or = { test: t => matchOr(t) };
+  const Nc = { test: t => matchNc(t) };
   const Lparen = { test: t => matchLparen(t) };
   const Rparen = { test: t => matchRparen(t) };
   const Lbracket = { test: t => matchLbracket(t) };
@@ -178,38 +182,122 @@ function id(x) { return x[0]; }
     StringN,
     BooleanN,
     NilN,
-    Var
+    Var,
+    Parenthesize,
+    BinOp,
+    VarDecl
   } = require("./nodes.cjs");
 var grammar = {
     Lexer: undefined,
     ParserRules: [
     {"name": "program$ebnf$1", "symbols": []},
-    {"name": "program$ebnf$1", "symbols": ["program$ebnf$1", "expression"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "program", "symbols": ["program$ebnf$1"], "postprocess": Program},
-    {"name": "expression$ebnf$1", "symbols": ["expterm"]},
+    {"name": "program$ebnf$1", "symbols": ["program$ebnf$1", "expterm"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "program$ebnf$2", "symbols": []},
+    {"name": "program$ebnf$2", "symbols": ["program$ebnf$2", "expression"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "program", "symbols": ["program$ebnf$1", "program$ebnf$2"], "postprocess": Program},
+    {"name": "expression$ebnf$1", "symbols": []},
     {"name": "expression$ebnf$1", "symbols": ["expression$ebnf$1", "expterm"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "expression", "symbols": ["expr", "expression$ebnf$1"], "postprocess": ([ data ]) => data},
+    {"name": "expression", "symbols": ["expr", "expression$ebnf$1"], "postprocess": ([data]) => data},
+    {"name": "expr", "symbols": ["binOp"], "postprocess": id},
     {"name": "expr", "symbols": ["atom"], "postprocess": id},
-    {"name": "atom", "symbols": ["identifier"], "postprocess": Var},
-    {"name": "atom", "symbols": ["string"], "postprocess": StringN},
-    {"name": "atom", "symbols": ["number"], "postprocess": NumberN},
-    {"name": "atom", "symbols": ["boolean"], "postprocess": BooleanN},
-    {"name": "atom", "symbols": ["nil"], "postprocess": NilN},
-    {"name": "identifier", "symbols": [Identifier], "postprocess": id},
-    {"name": "string", "symbols": [String], "postprocess": id},
-    {"name": "number", "symbols": [Number], "postprocess": id},
-    {"name": "number", "symbols": [Hexlit], "postprocess": id},
-    {"name": "number", "symbols": [Octlit], "postprocess": id},
-    {"name": "number", "symbols": [Binlit], "postprocess": id},
-    {"name": "boolean", "symbols": [True], "postprocess": id},
-    {"name": "boolean", "symbols": [False], "postprocess": id},
-    {"name": "nil", "symbols": [Nil], "postprocess": id},
+    {"name": "binOp", "symbols": ["expOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["mulOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["plusOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["shiftOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["compareOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["eqOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["bwandOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["bwxorOp"], "postprocess": id},
+    {"name": "binOp", "symbols": ["bworOp"]},
+    {"name": "ncOp$subexpression$1", "symbols": ["nc"]},
+    {"name": "ncOp", "symbols": ["orOp", "ncOp$subexpression$1", "ncOp"], "postprocess": BinOp},
+    {"name": "ncOp", "symbols": ["orOp"], "postprocess": id},
+    {"name": "orOp$subexpression$1", "symbols": ["or"]},
+    {"name": "orOp", "symbols": ["andoper", "orOp$subexpression$1", "orOp"], "postprocess": BinOp},
+    {"name": "orOp", "symbols": ["andoper"], "postprocess": id},
+    {"name": "andoper$subexpression$1", "symbols": ["andop"]},
+    {"name": "andoper", "symbols": ["bworOp", "andoper$subexpression$1", "andoper"], "postprocess": BinOp},
+    {"name": "andoper", "symbols": ["bworOp"], "postprocess": id},
+    {"name": "bworOp$subexpression$1", "symbols": ["bwor"]},
+    {"name": "bworOp", "symbols": ["bwxorOp", "bworOp$subexpression$1", "bworOp"], "postprocess": BinOp},
+    {"name": "bworOp", "symbols": ["bwxorOp"], "postprocess": id},
+    {"name": "bwxorOp$subexpression$1", "symbols": ["bwxor"]},
+    {"name": "bwxorOp", "symbols": ["bwandOp", "bwxorOp$subexpression$1", "bwxorOp"], "postprocess": BinOp},
+    {"name": "bwxorOp", "symbols": ["bwandOp"], "postprocess": id},
+    {"name": "bwandOp$subexpression$1", "symbols": ["bwand"]},
+    {"name": "bwandOp", "symbols": ["eqOp", "bwandOp$subexpression$1", "bwandOp"], "postprocess": BinOp},
+    {"name": "bwandOp", "symbols": ["eqOp"], "postprocess": id},
+    {"name": "eqOp$subexpression$1", "symbols": ["eq"]},
+    {"name": "eqOp$subexpression$1", "symbols": ["ne"]},
+    {"name": "eqOp", "symbols": ["compareOp", "eqOp$subexpression$1", "eqOp"], "postprocess": BinOp},
+    {"name": "eqOp", "symbols": ["compareOp"], "postprocess": id},
+    {"name": "compareOp$subexpression$1", "symbols": ["lt"]},
+    {"name": "compareOp$subexpression$1", "symbols": ["gt"]},
+    {"name": "compareOp$subexpression$1", "symbols": ["lte"]},
+    {"name": "compareOp$subexpression$1", "symbols": ["gte"]},
+    {"name": "compareOp$subexpression$1", "symbols": ["in"]},
+    {"name": "compareOp", "symbols": ["shiftOp", "compareOp$subexpression$1", "compareOp"], "postprocess": BinOp},
+    {"name": "compareOp", "symbols": ["shiftOp"], "postprocess": id},
+    {"name": "shiftOp$subexpression$1", "symbols": ["lshift"]},
+    {"name": "shiftOp$subexpression$1", "symbols": ["rshift"]},
+    {"name": "shiftOp", "symbols": ["plusOp", "shiftOp$subexpression$1", "shiftOp"], "postprocess": BinOp},
+    {"name": "shiftOp", "symbols": ["plusOp"], "postprocess": id},
+    {"name": "plusOp$subexpression$1", "symbols": ["plus"]},
+    {"name": "plusOp$subexpression$1", "symbols": ["minus"]},
+    {"name": "plusOp", "symbols": ["mulOp", "plusOp$subexpression$1", "plusOp"], "postprocess": BinOp},
+    {"name": "plusOp", "symbols": ["mulOp"], "postprocess": id},
+    {"name": "mulOp$subexpression$1", "symbols": ["mul"]},
+    {"name": "mulOp$subexpression$1", "symbols": ["div"]},
+    {"name": "mulOp$subexpression$1", "symbols": ["rem"]},
+    {"name": "mulOp", "symbols": ["expOp", "mulOp$subexpression$1", "mulOp"], "postprocess": BinOp},
+    {"name": "mulOp", "symbols": ["expOp"], "postprocess": id},
+    {"name": "expOp", "symbols": ["atom", "exp", "expOp"], "postprocess": BinOp},
+    {"name": "expOp", "symbols": ["atom"], "postprocess": id},
+    {"name": "bind", "symbols": [Bind], "postprocess": id},
+    {"name": "nc", "symbols": [Nc], "postprocess": id},
+    {"name": "or", "symbols": [Or], "postprocess": id},
+    {"name": "andop", "symbols": [Andop], "postprocess": id},
+    {"name": "bwor", "symbols": [Bwor], "postprocess": id},
+    {"name": "bwxor", "symbols": [Bwxor], "postprocess": id},
+    {"name": "bwand", "symbols": [Bwand], "postprocess": id},
+    {"name": "eq", "symbols": [Eq], "postprocess": id},
+    {"name": "ne", "symbols": [Ne], "postprocess": id},
+    {"name": "lt", "symbols": [Lt], "postprocess": id},
+    {"name": "gt", "symbols": [Gt], "postprocess": id},
+    {"name": "lte", "symbols": [Lte], "postprocess": id},
+    {"name": "gte", "symbols": [Gte], "postprocess": id},
+    {"name": "in", "symbols": [In], "postprocess": id},
+    {"name": "lshift", "symbols": [Lshift], "postprocess": id},
+    {"name": "rshift", "symbols": [Rshift], "postprocess": id},
+    {"name": "plus", "symbols": [Plus], "postprocess": id},
+    {"name": "minus", "symbols": [Minus], "postprocess": id},
+    {"name": "mul", "symbols": [Mul], "postprocess": id},
+    {"name": "div", "symbols": [Div], "postprocess": id},
+    {"name": "rem", "symbols": [Rem], "postprocess": id},
+    {"name": "exp", "symbols": [Exp], "postprocess": id},
+    {"name": "atom", "symbols": ["identifier"], "postprocess": id},
+    {"name": "atom", "symbols": ["string"], "postprocess": id},
+    {"name": "atom", "symbols": ["number"], "postprocess": id},
+    {"name": "atom", "symbols": ["boolean"], "postprocess": id},
+    {"name": "atom", "symbols": ["nil"], "postprocess": id},
+    {"name": "atom", "symbols": ["lparen", "expr", "rparen"], "postprocess": Parenthesize},
+    {"name": "identifier", "symbols": [Identifier], "postprocess": Var},
+    {"name": "string", "symbols": [String], "postprocess": StringN},
+    {"name": "number", "symbols": [Number], "postprocess": NumberN},
+    {"name": "number", "symbols": [Hexlit], "postprocess": NumberN},
+    {"name": "number", "symbols": [Octlit], "postprocess": NumberN},
+    {"name": "number", "symbols": [Binlit], "postprocess": NumberN},
+    {"name": "boolean", "symbols": [True], "postprocess": BooleanN},
+    {"name": "boolean", "symbols": [False], "postprocess": BooleanN},
+    {"name": "nil", "symbols": [Nil], "postprocess": NilN},
+    {"name": "lparen", "symbols": [Lparen], "postprocess": id},
+    {"name": "rparen", "symbols": [Rparen], "postprocess": id},
     {"name": "expterm", "symbols": ["newline"], "postprocess": id},
     {"name": "expterm", "symbols": ["semi"], "postprocess": id},
     {"name": "expterm", "symbols": ["eof"], "postprocess": id},
-    {"name": "newline", "symbols": [Nl]},
-    {"name": "semi", "symbols": [Semi]},
-    {"name": "eof", "symbols": [Eof]}
+    {"name": "newline", "symbols": [Nl], "postprocess": id},
+    {"name": "semi", "symbols": [Semi], "postprocess": id},
+    {"name": "eof", "symbols": [Eof], "postprocess": id}
 ]
   , ParserStart: "program"
 }

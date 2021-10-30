@@ -115,8 +115,9 @@ const tokens = {
     type: moo.keywords(
       Object.fromEntries(
         [
+          "def",
           "let",
-          "letrec",
+          "rec",
           "in",
           "and",
           "if",
@@ -172,6 +173,7 @@ const tokens = {
   ne: "!=",
   andop: "&&",
   or: "||",
+  nc: "??",
   lparen: "(",
   rparen: ")",
   lbracket: "[",

@@ -1,12 +1,7 @@
 import parse from "./parser.cjs";
 
-const code = `1
-2
-"hello"
-true
-nil
-greeting
+const code = `(2 + 2) * 2`;
 
-4`;
-
-console.log(JSON.stringify(parse(code), null, 2));
+const parsed = parse(code);
+console.log(JSON.stringify(parsed[0], null, 2));
+console.log("# of parses:", parsed.length);
