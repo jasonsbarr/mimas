@@ -2,7 +2,7 @@ const { point, first, last } = require("./helpers.cjs");
 
 exports.Program = (data) => ({
   node: "Program",
-  prog: last(data),
+  prog: last(data)[0],
   start: first(last(data)) && first(last(data)).start,
   end: last(last(data)) && last(last(data)).end,
 });
@@ -70,8 +70,47 @@ exports.VarDecl = (data) => ({
   end: data[3][0] && data[3][0].end,
 });
 
-const Func = (data) => {
-  console.log(data);
+const Func = (args, body) => {
+  const params = args.filter((t) => t && t.type !== "comma");
+  const makeFunc = (params) =>
+    params.length === 0
+      ? {
+          node: "Func",
+          arg: {
+            node: "Nil",
+            value: null,
+          },
+          body: body[0],
+        }
+      : params.length == 1
+      ? {
+          node: "Func",
+          arg: params[0],
+          body: body[0],
+        }
+      : {
+          node: "Func",
+          arg: params[0],
+          body: makeFunc(params.slice(1)),
+        };
+
+  return makeFunc(params);
+};
+
+exports.ParamList = (data) => {
   return data;
 };
-exports.Func = Func;
+
+exports.FuncDecl = (data) => {
+  console.log({
+    name: data[1],
+    args: data[3],
+    body: data[6],
+  });
+  const id = {
+    node: "VarDecl",
+    name: data[1],
+    expr: Func(data[3], data[6]),
+  };
+  return id;
+};

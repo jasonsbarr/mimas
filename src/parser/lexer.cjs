@@ -111,7 +111,7 @@ const tokens = {
   nil: { match: /nil/u, value: () => null },
   is: /is/u,
   identifier: {
-    match: /[\p{L}_\$][\p{L}\p{N}_\$\?!=\+-<>=\*\/]*/u,
+    match: /[\p{L}_\$][\p{L}\p{N}_\$]*/u,
     type: moo.keywords(
       Object.fromEntries(
         [

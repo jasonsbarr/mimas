@@ -181,7 +181,9 @@
     Var,
     Parenthesize,
     BinOp,
-    VarDecl
+    VarDecl,
+    ParamList,
+    FuncDecl
   } = require("./nodes.cjs");
 %}
 
@@ -191,15 +193,24 @@ expression ->
     expr expterm:*                                                                                                 {% ([data]) => data %}
 
 expr ->
-    variableDeclaration                                                                                             {% id %}
+  atom                                                                                                              {% id %}
   | binOp                                                                                                           {% id %}
-  | atom                                                                                                            {% id %}
+  | variableDeclaration                                                                                             {% id %}
+  | funcDeclaration
+
+funcDeclaration ->
+    def identifier lparen paramList rparen colon expr                                                               {% FuncDecl %}
+
+paramList ->
+    identifier comma paramList                                                                                       {% ParamList %}
+  | identifier:?                                                                                                     {% id %}
+
 
 variableDeclaration ->
     let identifier bind expression                                                                                  {% VarDecl %}
 
 let -> %Let                                                                                                         {% id %}
-# def -> %Def                                                                                                         {% id %}
+def -> %Def                                                                                                         {% id %}
 
 binOp ->
     expOp                                                                                                           {% id %}
@@ -286,6 +297,8 @@ nil -> %Nil                                                                     
 
 lparen -> %Lparen                                                                                                   {% id %}
 rparen -> %Rparen                                                                                                   {% id %}
+comma -> %Comma                                                                                                     {% id %}
+colon -> %Colon                                                                                                     {% id %}
 
 expterm ->
     newline                                                                                                         {% id %}
