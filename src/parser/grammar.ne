@@ -191,14 +191,14 @@ expression ->
     expr expterm:*                                                                                                 {% ([data]) => data %}
 
 expr ->
-    binOp                                                                                                           {% id %}
+    variableDeclaration                                                                                             {% id %}
+  | binOp                                                                                                           {% id %}
   | atom                                                                                                            {% id %}
-#   | variableDeclaration                                                                                             {% id %}
 
-# variableDeclaration ->
-#     let identifier bind expression                                                                                  {% VarDecl %}
+variableDeclaration ->
+    let identifier bind expression                                                                                  {% VarDecl %}
 
-# let -> %Let                                                                                                         {% id %}
+let -> %Let                                                                                                         {% id %}
 # def -> %Def                                                                                                         {% id %}
 
 binOp ->

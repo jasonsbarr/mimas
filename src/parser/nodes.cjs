@@ -65,9 +65,9 @@ exports.BinOp = (data) => ({
 exports.VarDecl = (data) => ({
   node: "VarDecl",
   name: data[1],
-  expr: data[3],
+  expr: data[3][0],
   start: point(first(data)),
-  end: point(last(data)),
+  end: data[3][0] && data[3][0].end,
 });
 
 const Func = (data) => {
