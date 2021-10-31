@@ -64,8 +64,9 @@ exports.TypeAnnotation = TypeAnnotation;
 
 exports.VarDecl = (data) => ({
   node: "VarDecl",
-  name: data[1],
+  name: data[1][0],
   expr: data[3][0],
+  type: data[1][0].type,
   loc: point(first(data)),
 });
 
@@ -112,6 +113,8 @@ exports.FuncDecl = (data) => {
       line: data[0].line,
       col: data[0].col,
     }),
+    type: data[5],
+    loc: { line: data[0].line, col: data[0].col },
   };
   return id;
 };
