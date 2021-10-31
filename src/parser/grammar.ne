@@ -43,7 +43,7 @@
   const matchIs = match("is");
   const matchString = match("string");
   const matchEof = match("eof");
-  const matchApply = match("apply");
+  const matchArrow = match("arrow");
   const matchPipe = match("pipe");
   const matchConcat = match("concat");
   const matchPlus = match("plus");
@@ -126,7 +126,7 @@
   const Is = { test: t => matchIs(t) };
   const String = { test: t => matchString(t) };
   const Eof = { test: t => matchEof(t) };
-  const Apply = { test: t => matchApply(t) };
+  const Arrow = { test: t => matchArrow(t) };
   const Pipe = { test: t => matchPipe(t) };
   const Concat = { test: t => matchConcat(t) };
   const Plus = { test: t => matchPlus(t) };
@@ -181,33 +181,48 @@
     Var,
     Parenthesize,
     BinOp,
+    TypeAnnotation,
     VarDecl,
     ParamList,
-    FuncDecl
+    ReturnAnnotation,
+    FuncDecl,
+    Apply
   } = require("./nodes.cjs");
 %}
 
 program -> expterm:* expression:*                                                                                   {% Program %}
 
 expression ->
-    expr expterm:*                                                                                                 {% ([data]) => data %}
+    expr expterm:*                                                                                                  {% ([data]) => data %}
 
 expr ->
   atom                                                                                                              {% id %}
   | binOp                                                                                                           {% id %}
   | variableDeclaration                                                                                             {% id %}
-  | funcDeclaration
+  | funcDeclaration                                                                                                 {% id %}
+
+funcApplication ->
+    expr lparen argList rparen                                                                                      {% Apply %}
+
+argList ->
+    expr comma argList                                                                                              {% id %}
+  | expr:?                                                                                                          {% id %}
 
 funcDeclaration ->
-    def identifier lparen paramList rparen colon expr                                                               {% FuncDecl %}
+    def identifier lparen paramList rparen returnAnnotation:? colon newline:* expr                                  {% FuncDecl %}
+
+returnAnnotation
+    -> arrow identifier                                                                                             {% ReturnAnnotation %}
 
 paramList ->
-    identifier comma paramList                                                                                       {% ParamList %}
-  | identifier:?                                                                                                     {% id %}
-
+    (identifier|typeAnnotation) comma paramList                                                                     {% ParamList %}
+  | (identifier|typeAnnotation):?                                                                                   {% id %}
 
 variableDeclaration ->
-    let identifier bind expression                                                                                  {% VarDecl %}
+    let (identifier|typeAnnotation) bind expression                                                                 {% VarDecl %}
+
+typeAnnotation ->
+    identifier colon identifier                                                                                     {% TypeAnnotation %}
 
 let -> %Let                                                                                                         {% id %}
 def -> %Def                                                                                                         {% id %}
@@ -270,6 +285,7 @@ mul -> %Mul                                                                     
 div -> %Div                                                                                                         {% id %}
 rem -> %Rem                                                                                                         {% id %}
 exp -> %Exp                                                                                                         {% id %}
+arrow => %Arrow                                                                                                     {% id %}
 
 atom ->
     identifier                                                                                                      {% id %}

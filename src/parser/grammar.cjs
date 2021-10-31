@@ -47,7 +47,7 @@ function id(x) { return x[0]; }
   const matchIs = match("is");
   const matchString = match("string");
   const matchEof = match("eof");
-  const matchApply = match("apply");
+  const matchArrow = match("arrow");
   const matchPipe = match("pipe");
   const matchConcat = match("concat");
   const matchPlus = match("plus");
@@ -130,7 +130,7 @@ function id(x) { return x[0]; }
   const Is = { test: t => matchIs(t) };
   const String = { test: t => matchString(t) };
   const Eof = { test: t => matchEof(t) };
-  const Apply = { test: t => matchApply(t) };
+  const Arrow = { test: t => matchArrow(t) };
   const Pipe = { test: t => matchPipe(t) };
   const Concat = { test: t => matchConcat(t) };
   const Plus = { test: t => matchPlus(t) };
@@ -185,9 +185,12 @@ function id(x) { return x[0]; }
     Var,
     Parenthesize,
     BinOp,
+    TypeAnnotation,
     VarDecl,
     ParamList,
-    FuncDecl
+    ReturnAnnotation,
+    FuncDecl,
+    Apply
   } = require("./nodes.cjs");
 var grammar = {
     Lexer: undefined,
@@ -203,13 +206,30 @@ var grammar = {
     {"name": "expr", "symbols": ["atom"], "postprocess": id},
     {"name": "expr", "symbols": ["binOp"], "postprocess": id},
     {"name": "expr", "symbols": ["variableDeclaration"], "postprocess": id},
-    {"name": "expr", "symbols": ["funcDeclaration"]},
-    {"name": "funcDeclaration", "symbols": ["def", "identifier", "lparen", "paramList", "rparen", "colon", "expr"], "postprocess": FuncDecl},
-    {"name": "paramList", "symbols": ["identifier", "comma", "paramList"], "postprocess": ParamList},
-    {"name": "paramList$ebnf$1", "symbols": ["identifier"], "postprocess": id},
+    {"name": "expr", "symbols": ["funcDeclaration"], "postprocess": id},
+    {"name": "funcApplication", "symbols": ["expr", "lparen", "argList", "rparen"], "postprocess": Apply},
+    {"name": "argList", "symbols": ["expr", "comma", "argList"], "postprocess": id},
+    {"name": "argList$ebnf$1", "symbols": ["expr"], "postprocess": id},
+    {"name": "argList$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "argList", "symbols": ["argList$ebnf$1"], "postprocess": id},
+    {"name": "funcDeclaration$ebnf$1", "symbols": ["returnAnnotation"], "postprocess": id},
+    {"name": "funcDeclaration$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
+    {"name": "funcDeclaration$ebnf$2", "symbols": []},
+    {"name": "funcDeclaration$ebnf$2", "symbols": ["funcDeclaration$ebnf$2", "newline"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "funcDeclaration", "symbols": ["def", "identifier", "lparen", "paramList", "rparen", "funcDeclaration$ebnf$1", "colon", "funcDeclaration$ebnf$2", "expr"], "postprocess": FuncDecl},
+    {"name": "returnAnnotation", "symbols": ["arrow", "identifier"], "postprocess": ReturnAnnotation},
+    {"name": "paramList$subexpression$1", "symbols": ["identifier"]},
+    {"name": "paramList$subexpression$1", "symbols": ["typeAnnotation"]},
+    {"name": "paramList", "symbols": ["paramList$subexpression$1", "comma", "paramList"], "postprocess": ParamList},
+    {"name": "paramList$ebnf$1$subexpression$1", "symbols": ["identifier"]},
+    {"name": "paramList$ebnf$1$subexpression$1", "symbols": ["typeAnnotation"]},
+    {"name": "paramList$ebnf$1", "symbols": ["paramList$ebnf$1$subexpression$1"], "postprocess": id},
     {"name": "paramList$ebnf$1", "symbols": [], "postprocess": function(d) {return null;}},
     {"name": "paramList", "symbols": ["paramList$ebnf$1"], "postprocess": id},
-    {"name": "variableDeclaration", "symbols": ["let", "identifier", "bind", "expression"], "postprocess": VarDecl},
+    {"name": "variableDeclaration$subexpression$1", "symbols": ["identifier"]},
+    {"name": "variableDeclaration$subexpression$1", "symbols": ["typeAnnotation"]},
+    {"name": "variableDeclaration", "symbols": ["let", "variableDeclaration$subexpression$1", "bind", "expression"], "postprocess": VarDecl},
+    {"name": "typeAnnotation", "symbols": ["identifier", "colon", "identifier"], "postprocess": TypeAnnotation},
     {"name": "let", "symbols": [Let], "postprocess": id},
     {"name": "def", "symbols": [Def], "postprocess": id},
     {"name": "binOp", "symbols": ["expOp"], "postprocess": id},
@@ -287,6 +307,7 @@ var grammar = {
     {"name": "div", "symbols": [Div], "postprocess": id},
     {"name": "rem", "symbols": [Rem], "postprocess": id},
     {"name": "exp", "symbols": [Exp], "postprocess": id},
+    {"name": "arrow", "symbols": [Arrow], "postprocess": id},
     {"name": "atom", "symbols": ["identifier"], "postprocess": id},
     {"name": "atom", "symbols": ["string"], "postprocess": id},
     {"name": "atom", "symbols": ["number"], "postprocess": id},

@@ -2,52 +2,46 @@ const { point, first, last } = require("./helpers.cjs");
 
 exports.Program = (data) => ({
   node: "Program",
-  prog: last(data)[0],
-  start: first(last(data)) && first(last(data)).start,
-  end: last(last(data)) && last(last(data)).end,
+  prog: last(data),
 });
 
 exports.NumberN = (data) => ({
   node: "Number",
   value: first(data).value,
-  start: point(first(data)),
-  end: point(last(data)),
+  loc: point(first(data)),
 });
 
 exports.StringN = (data) => ({
   node: "String",
   value: first(data).value,
-  start: point(first(data)),
-  end: point(last(data)),
+  loc: point(first(data)),
 });
 
 exports.BooleanN = (data) => ({
   node: "Boolean",
   value: first(data).value,
-  start: point(first(data)),
-  end: point(last(data)),
+  loc: point(first(data)),
 });
 
 exports.NilN = (data) => ({
   node: "Nil",
   value: first(data).value,
-  start: point(first(data)),
-  end: point(last(data)),
+  loc: point(first(data)),
 });
 
-exports.Var = (data) => ({
+const Var = (data) => ({
   node: "Var",
   value: first(data).value,
-  start: point(first(data)),
-  end: point(last(data)),
+  loc: point(first(data)),
 });
+
+exports.Var = Var;
 
 const BinOperator = (data) => {
   const op = Array.isArray(data) ? data[0] : data;
   return {
     value: op.value,
-    start: point(op),
-    end: point(op),
+    loc: point(op),
   };
 };
 
@@ -58,59 +52,70 @@ exports.BinOp = (data) => ({
   left: first(data),
   op: BinOperator(data[1]),
   right: last(data),
-  start: first(data).start,
-  end: last(data).end,
+  loc: first(data).loc,
 });
+
+const TypeAnnotation = (data) => {
+  const id = first(data);
+  return { ...id, type: data[2].value };
+};
+
+exports.TypeAnnotation = TypeAnnotation;
 
 exports.VarDecl = (data) => ({
   node: "VarDecl",
   name: data[1],
   expr: data[3][0],
-  start: point(first(data)),
-  end: data[3][0] && data[3][0].end,
+  loc: point(first(data)),
 });
 
-const Func = (args, body) => {
-  const params = args.filter((t) => t && t.type !== "comma");
+const Func = (args, body, retType, loc) => {
+  body = Array.isArray(body) ? body[0] : body;
+  const params =
+    args !== null ? args.filter((t) => t && t.type !== "comma") : [];
   const makeFunc = (params) =>
     params.length === 0
       ? {
           node: "Func",
-          arg: {
-            node: "Nil",
-            value: null,
-          },
-          body: body[0],
+          arg: null,
+          body: body,
+          type: retType,
+          loc,
         }
       : params.length == 1
       ? {
           node: "Func",
           arg: params[0],
-          body: body[0],
+          body: body,
+          type: retType,
+          loc,
         }
       : {
           node: "Func",
           arg: params[0],
           body: makeFunc(params.slice(1)),
+          loc,
         };
 
   return makeFunc(params);
 };
 
-exports.ParamList = (data) => {
-  return data;
-};
+exports.ParamList = (data) => data.flat(Infinity);
+
+exports.ReturnAnnotation = (data) => last(data).value;
 
 exports.FuncDecl = (data) => {
-  console.log({
-    name: data[1],
-    args: data[3],
-    body: data[6],
-  });
   const id = {
     node: "VarDecl",
     name: data[1],
-    expr: Func(data[3], data[6]),
+    expr: Func(data[3], data[8], data[5], {
+      line: data[0].line,
+      col: data[0].col,
+    }),
   };
   return id;
 };
+
+const Apply = (data) => {};
+
+exports.Apply = Apply;

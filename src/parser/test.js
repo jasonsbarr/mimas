@@ -1,6 +1,6 @@
 import parse from "./parser.cjs";
 
-const code = `def func(a, b): a + b`;
+const code = `def func(a: int) -> int: a`;
 
 const parsed = parse(code);
 console.log(JSON.stringify(parsed[0], null, 2));
