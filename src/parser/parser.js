@@ -1,6 +1,6 @@
 const nearley = require("nearley");
 const { pipe } = require("./helpers.cjs");
-const lexer = require("./lexer.cjs");
+const lexer = require("./lexer.js");
 const grammar = require("./grammar.cjs");
 
 const parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));

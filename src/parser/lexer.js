@@ -1,4 +1,4 @@
-const moo = require("moo");
+import moo from "moo";
 
 const isHexadecimalChar = (ch) => /^[0-9a-fA-F]$/.test(ch);
 
@@ -91,7 +91,7 @@ const tokens = {
       value: (n) => Number(n),
     },
     {
-      match: /0\.\d*/u,
+      match: /0+\.\d*/u,
       value: (n) => Number(n),
     },
     {
@@ -99,7 +99,7 @@ const tokens = {
       value: (n) => Number(n),
     },
     {
-      match: /[1-9]\d*|0/u,
+      match: /[1-9]\d*|0+/u,
       value: (n) => Number(n),
     },
   ],
@@ -109,7 +109,6 @@ const tokens = {
   true: { match: /true/u, value: () => true },
   false: { match: /false/u, value: () => false },
   nil: { match: /nil/u, value: () => null },
-  is: /is/u,
   identifier: {
     match: /[\p{L}_\$][\p{L}\p{N}_\$]*/u,
     type: moo.keywords(
@@ -123,9 +122,11 @@ const tokens = {
           "if",
           "then",
           "else",
+          "is",
           "fun",
           "when",
           "for",
+          "while",
           "type",
           "match",
           "with",
@@ -138,6 +139,7 @@ const tokens = {
           "end",
           "as",
           "import",
+          "from",
           "open",
         ].map((w) => [w, w])
       )
@@ -152,6 +154,7 @@ const tokens = {
   arrow: /->/u,
   pipe: "|>",
   concat: "++",
+  cons: "::",
   plus: "+",
   minus: /-/u,
   exp: "**",
@@ -195,4 +198,4 @@ const tokens = {
   bang: "!",
 };
 
-module.exports = moo.compile(tokens);
+export default moo.compile(tokens);

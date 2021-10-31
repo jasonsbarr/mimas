@@ -1,4 +1,4 @@
-import parse from "./parser.cjs";
+import parse from "./parser.js";
 
 const code = `func(1, 2, 3, 4, 5)`;
 
