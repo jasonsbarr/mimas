@@ -13,4 +13,4 @@ const lex = (input) => [...lexer.reset(input)].filter((t) => t.type !== "WS");
 
 const feed = (tokens) => parser.feed(tokens);
 
-module.exports = (code) => pipe(code, raw, eof, lex, feed).results;
+module.exports = (code) => pipe(code, raw, eof, lex, feed).results[0];

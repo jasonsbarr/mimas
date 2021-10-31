@@ -2,7 +2,7 @@ const { point, first, last } = require("./helpers.cjs");
 
 exports.Program = (data) => ({
   node: "Program",
-  prog: last(data),
+  prog: first(last(data)),
 });
 
 exports.NumberN = (data) => ({
@@ -119,6 +119,31 @@ exports.FuncDecl = (data) => {
   return id;
 };
 
-const Apply = (data) => {};
+exports.ArgList = (data) =>
+  data.filter((n) => n.type !== "comma").flat(Infinity);
 
-exports.Apply = Apply;
+const MakeApply = (func, args) => {
+  args = args[0] !== null ? args : [];
+  return args.length === 0
+    ? {
+        node: "Apply",
+        func,
+        arg: null,
+        loc: func.loc,
+      }
+    : args.length === 1
+    ? {
+        node: "Apply",
+        func,
+        arg: first(args),
+        loc: func.loc,
+      }
+    : {
+        node: "Apply",
+        func: MakeApply(func, args.slice(0, -1)),
+        arg: last(args),
+        loc: func.loc,
+      };
+};
+
+exports.Apply = (data) => MakeApply(first(data), data[2]);

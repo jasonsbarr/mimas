@@ -186,6 +186,7 @@
     ParamList,
     ReturnAnnotation,
     FuncDecl,
+    ArgList,
     Apply
   } = require("./nodes.cjs");
 %}
@@ -205,8 +206,8 @@ funcApplication ->
     expr lparen argList rparen                                                                                      {% Apply %}
 
 argList ->
-    expr comma argList                                                                                              {% id %}
-  | expr:?                                                                                                          {% id %}
+    expr comma argList                                                                                              {% ArgList %}
+  | expr:?                                                                                                          {% data => data %}
 
 funcDeclaration ->
     def identifier lparen paramList rparen returnAnnotation:? colon newline:* expr                                  {% FuncDecl %}
@@ -294,6 +295,8 @@ atom ->
   | boolean                                                                                                         {% id %}
   | nil                                                                                                             {% id %}
   | lparen expr rparen                                                                                              {% Parenthesize %}
+  # needs to be an atom so it can be used in a binary operation
+  | funcApplication                                                                                                 {% id %}
 
 identifier -> %Identifier                                                                                           {% Var %}
 

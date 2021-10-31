@@ -1,7 +1,6 @@
 import parse from "./parser.cjs";
 
-const code = `let a = 10`;
+const code = `func(1, 2, 3, 4, 5)`;
 
 const parsed = parse(code);
-console.log(JSON.stringify(parsed[0], null, 2));
-console.log("# of parses:", parsed.length);
+console.log(JSON.stringify(parsed, null, 2));
