@@ -276,13 +276,16 @@ const parse = (input) => {
       if (otherPrec > prec) {
         skip(); // skip over operator token
 
-        return maybeBinary({
-          node: matchAssign(tok) ? "Assign" : "BinOp",
-          op: tok.value,
-          left,
-          right: maybeBinary(parseExpr(), otherPrec),
-          loc: left.loc,
-        });
+        return maybeBinary(
+          BinOp({
+            node: matchAssign(tok) ? "Assign" : "BinOp",
+            op: tok.value,
+            left,
+            right: maybeBinary(parseExpr(), otherPrec),
+            loc: left.loc,
+          }),
+          prec
+        );
       }
     }
 
