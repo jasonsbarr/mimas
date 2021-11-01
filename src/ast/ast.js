@@ -13,11 +13,7 @@ const variantInfos = [
   VariantInfo("Program", [], {
     toString() {
       const value = this.value;
-      return `{
-  node: ${value.node},
-  prog: [
-${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
-}`;
+      return ``;
     },
   }),
   /**
@@ -97,7 +93,11 @@ ${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
   VariantInfo("Apply", [], {
     toString() {
       const value = this.value;
-      return `${value.func.toString()}(${value.arg.toString()})`;
+      return JSON.stringify(
+        { node: "Apply", func: value.func, arg: value.arg },
+        2,
+        null
+      );
     },
   }),
 ];

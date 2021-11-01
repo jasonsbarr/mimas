@@ -282,8 +282,13 @@ const parse = (input) => {
 
     while (!matchRparen(tok)) {
       args.push(parseExpr());
-      tok = next();
+      tok = peek();
+      if (matchComma(tok)) {
+        tok = next();
+      }
     }
+
+    skipIf(matchRparen);
 
     const makeApply = (func, args) =>
       args.length === 0
@@ -378,7 +383,7 @@ const parse = (input) => {
       }
     }
 
-    return maybeCall(() => maybeBinary(parseAtom(), 0));
+    return maybeCall(() => maybeBinary(expr, 0));
   };
 
   /**
