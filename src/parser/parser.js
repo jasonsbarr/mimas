@@ -1,6 +1,6 @@
 import { pipeline } from "@jasonsbarr/functional-core/lib/lambda/pipeline.js";
 import lexer from "./lexer.js";
-import { Program, Number } from "../ast/ast.js";
+import { Program, Number, String, Boolean, Nil, Var } from "../ast/ast.js";
 
 const raw = (str) => String.raw`${str}`;
 const eof = (code) => code.concat(" <*endofinput*>");
@@ -197,6 +197,13 @@ const matchPunc = (token) =>
   matchRbrace(token) ||
   matchQuest(token);
 
+const makePoint = (token) => ({ line: token.line, col: token.col });
+const makePrimNode = (name, token) => ({
+  node: name,
+  value: token.value,
+  loc: makePoint(token),
+});
+
 const precedence = {
   "=": 5, // binding
   ":=": 5, // assignment
@@ -274,13 +281,16 @@ const parse = (input) => {
 
   /**
    * atom ->
-   *    number
+   *    '(' expr ')'
+   *  | number
+   *  | string
    */
   const parseAtom = () => {
     let tok = peek();
 
     return maybeCall(() => {
       if (matchLparen(tok)) {
+        // parenthesized expression
         skip();
 
         const expr = parseExpr();
@@ -290,15 +300,30 @@ const parse = (input) => {
         return expr;
       }
 
+      // Must be an identifier or primitive literal
       skip();
 
       if (matchNumTok(tok)) {
-        return Number({
-          node: "Number",
-          value: tok.value,
-          loc: { line: tok.line, col: tok.col },
-        });
+        return Number(makePrimNode("Number", tok));
       }
+
+      if (matchString(tok)) {
+        return String(makePrimNode("String", tok));
+      }
+
+      if (matchBool(tok)) {
+        return Boolean(makePrimNode("Boolean", tok));
+      }
+
+      if (matchNil(tok)) {
+        return Nil(makePrimNode("Nil", tok));
+      }
+
+      if (matchIdentifier(tok)) {
+        return Var(makePrimNode("Var", tok));
+      }
+
+      croak(`Unknown token ${tok.value} at line: ${tok.line}, col: ${tok.col}`);
     });
   };
 

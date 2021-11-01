@@ -16,7 +16,7 @@ const variantInfos = [
       return `{
   node: ${value.node},
   prog: [
-          ${value.prog.reduce((str, n) => str + n.toString() + ",\n", "")}  ]
+${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
 }`;
     },
   }),
@@ -33,7 +33,59 @@ const variantInfos = [
       return `{ node: ${value.node}, value: ${value.value} }`;
     },
   }),
+  /**
+   * String of {
+   *   node: string,
+   *   value: string,
+   *   loc: {line: number, col: number}
+   * }
+   */
+  VariantInfo("String", [], {
+    toString() {
+      const value = this.value;
+      return `{ node: ${value.node}, value: ${value.value} }`;
+    },
+  }),
+  /**
+   * Boolean of {
+   *   node: string,
+   *   value: string,
+   *   loc: {line: number, col: number}
+   * }
+   */
+  VariantInfo("Boolean", [], {
+    toString() {
+      const value = this.value;
+      return `{ node: ${value.node}, value: ${value.value} }`;
+    },
+  }),
+  /**
+   * Nil of {
+   *   node: string,
+   *   value: string,
+   *   loc: {line: number, col: number}
+   * }
+   */
+  VariantInfo("Nil", [], {
+    toString() {
+      const value = this.value;
+      return `{ node: ${value.node}, value: ${value.value} }`;
+    },
+  }),
+  /**
+   * Var of {
+   *   node: string,
+   *   value: string,
+   *   loc: {line: number, col: number}
+   * }
+   */
+  VariantInfo("Var", [], {
+    toString() {
+      const value = this.value;
+      return `{ node: ${value.node}, value: ${value.value} }`;
+    },
+  }),
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program, Number } = Ast;
+export const { Program, Number, String, Boolean, Nil, Var } = Ast;
