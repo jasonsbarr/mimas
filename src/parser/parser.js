@@ -1,6 +1,16 @@
 import { pipeline } from "@jasonsbarr/functional-core/lib/lambda/pipeline.js";
 import lexer from "./lexer.js";
-import { Program, Number, String, Boolean, Nil, Var } from "../ast/ast.js";
+import {
+  Program,
+  Number,
+  String,
+  Boolean,
+  Nil,
+  Var,
+  Apply,
+} from "../ast/ast.js";
+
+import { first, last } from "./helpers.js";
 
 const raw = (str) => String.raw`${str}`;
 const eof = (code) => code.concat(" <*endofinput*>");
@@ -195,6 +205,7 @@ const matchPunc = (token) =>
   matchRbracket(token) ||
   matchLbrace(token) ||
   matchRbrace(token) ||
+  matchBang(token) ||
   matchQuest(token);
 
 const makePoint = (token) => ({ line: token.line, col: token.col });
@@ -272,11 +283,42 @@ const parse = (input) => {
     return left;
   };
 
-  const parseCall = (func) => {};
+  const parseApply = (func) => {
+    // skip opening paren
+    let tok = next();
+    let args = [];
+
+    while (!matchRparen(tok)) {
+      args.push(parseExpr());
+      tok = next();
+    }
+
+    const makeApply = (func, args) =>
+      args.length === 0
+        ? Apply({
+            node: "Apply",
+            func,
+            arg: null,
+            loc: func.loc,
+          })
+        : args.length === 1
+        ? Apply({
+            node: "Apply",
+            func,
+            arg: first(args),
+          })
+        : Apply({
+            node: "Apply",
+            arg: last(args),
+            func: makeApply(func, args.slice(0, -1)),
+          });
+
+    return makeApply(func, args);
+  };
 
   const maybeCall = (expr) => {
     expr = expr();
-    return matchLparen(peek()) ? parseCall(expr) : expr;
+    return matchLparen(peek()) ? parseApply(expr) : expr;
   };
 
   /**
@@ -284,6 +326,10 @@ const parse = (input) => {
    *    '(' expr ')'
    *  | number
    *  | string
+   *  | bool
+   *  | nil
+   *  | Var
+   *  | Apply
    */
   const parseAtom = () => {
     let tok = peek();
@@ -331,7 +377,15 @@ const parse = (input) => {
    * expr ->
    *    atom
    */
-  const parseExpr = () => {
+  const parseExpr = ({ tuple = false } = {}) => {
+    const expr = maybeBinary(parseAtom(), 0);
+
+    if (matchComma(peek())) {
+      if (!tuple) {
+        return expr;
+      }
+    }
+
     return maybeCall(() => maybeBinary(parseAtom(), 0));
   };
 

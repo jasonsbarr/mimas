@@ -85,7 +85,22 @@ ${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
       return `{ node: ${value.node}, value: ${value.value} }`;
     },
   }),
+  /**
+   * Apply - represents a function application
+   * Apply of {
+   *   node: string,
+   *   func: Ast,
+   *   arg: Ast,
+   *   loc: {line: number, col: number}
+   * }
+   */
+  VariantInfo("Apply", [], {
+    toString() {
+      const value = this.value;
+      return `${value.func.toString()}(${value.arg.toString()})`;
+    },
+  }),
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program, Number, String, Boolean, Nil, Var } = Ast;
+export const { Program, Number, String, Boolean, Nil, Var, Apply } = Ast;
