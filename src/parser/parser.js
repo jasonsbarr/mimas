@@ -1,6 +1,16 @@
 import { pipeline } from "@jasonsbarr/functional-core/lib/lambda/pipeline.js";
 import lexer from "./lexer.js";
-import { Program, Num, Str, Bool, Nil, Var, Apply, BinOp } from "../ast/ast.js";
+import {
+  Program,
+  Num,
+  Str,
+  Bool,
+  Nil,
+  Var,
+  Apply,
+  BinOp,
+  UnOp,
+} from "../ast/ast.js";
 
 import { first, last } from "./helpers.js";
 
@@ -130,7 +140,6 @@ const matchKeyword = (token) =>
   matchModule(token) ||
   matchPrivate(token) ||
   matchMutable(token) ||
-  matchNot(token) ||
   matchAs(token) ||
   matchImport(token) ||
   matchFrom(token) ||
@@ -172,6 +181,7 @@ const matchBinOp = (token) =>
 const matchUnOp = (token) =>
   matchNot(token) ||
   matchPlus(token) ||
+  matchMinus(token) ||
   matchMul(token) ||
   matchBwnot(token) ||
   matchSpread(token) ||
@@ -335,6 +345,23 @@ const parse = (input) => {
     return matchLparen(peek()) ? parseApply(expr) : expr;
   };
 
+  const parseUnary = () => {
+    const tok = peek();
+
+    // skip operator
+    skip();
+
+    return UnOp({
+      node: "UnOp",
+      op: tok.value,
+      operand: parseExpr(),
+      loc: {
+        line: tok.line,
+        col: tok.col,
+      },
+    });
+  };
+
   /**
    * atom ->
    *    '(' expr ')'
@@ -392,9 +419,16 @@ const parse = (input) => {
    * expr ->
    *    atom
    *  | BinOp
+   *  | UnOp
    */
   const parseExpr = ({ tuple = true } = {}) => {
-    const expr = maybeBinary(parseAtom(), 0);
+    const tok = peek();
+
+    if (matchUnOp(tok)) {
+      return maybeCall(() => maybeBinary(parseUnary(), 0));
+    }
+
+    const expr = maybeCall(() => maybeBinary(parseAtom(), 0));
 
     if (matchComma(peek())) {
       if (!tuple) {

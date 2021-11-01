@@ -71,7 +71,17 @@ const variantInfos = [
    * }
    */
   VariantInfo("BinOp"),
+  /**
+   * UnOp - represents a unary operation
+   * UnOp of {
+   *   node: string,
+   *   op: string,
+   *   operand: Ast,
+   *   loc: { line: number, col: number }
+   * }
+   */
+  VariantInfo("UnOp"),
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program, Num, Str, Bool, Nil, Var, Apply, BinOp } = Ast;
+export const { Program, Num, Str, Bool, Nil, Var, Apply, BinOp, UnOp } = Ast;
