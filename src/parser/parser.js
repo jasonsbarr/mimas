@@ -295,7 +295,7 @@ const parse = (input) => {
     let args = [];
 
     while (!matchRparen(tok)) {
-      args.push(parseExpr());
+      args.push(parseExpr({ tuple: false }));
       tok = peek();
       if (matchComma(tok)) {
         tok = next();
@@ -389,7 +389,7 @@ const parse = (input) => {
    *    atom
    *  | BinOp
    */
-  const parseExpr = ({ tuple = false } = {}) => {
+  const parseExpr = ({ tuple = true } = {}) => {
     const expr = maybeBinary(parseAtom(), 0);
 
     if (matchComma(peek())) {
