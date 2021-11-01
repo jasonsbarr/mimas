@@ -1,6 +1,6 @@
 import parse from "./parser.js";
 
-const code = `func(1, 2, 3, 4, 5)`;
+const code = `1`;
 
 const parsed = parse(code);
-console.log(JSON.stringify(parsed, null, 2));
+console.log(String(parsed));

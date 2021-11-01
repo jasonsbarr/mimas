@@ -1,6 +1,6 @@
 import { pipeline } from "@jasonsbarr/functional-core/lib/lambda/pipeline.js";
 import lexer from "./lexer.js";
-import { Program } from "../ast/ast.js";
+import { Program, Number } from "../ast/ast.js";
 
 const raw = (str) => String.raw`${str}`;
 const eof = (code) => code.concat(" <*endofinput*>");
@@ -31,6 +31,7 @@ const matchAnd = match("and");
 const matchIf = match("if");
 const matchThen = match("then");
 const matchElse = match("else");
+const matchUnless = match("unless");
 const matchIs = match("is");
 const matchFun = match("fun");
 const matchWhen = match("when");
@@ -118,6 +119,7 @@ const matchKeyword = (token) =>
   matchIf(token) ||
   matchThen(token) ||
   matchElse(token) ||
+  matchUnless(token) ||
   matchIs(token) ||
   matchFun(token) ||
   matchWhen(token) ||
@@ -245,31 +247,86 @@ const parse = (input) => {
   const croak = (message) => {
     throw new SyntaxError(message);
   };
-  const skipIf = (pred) =>
+  const skipIf = (pred, expected) =>
     pred(peek())
       ? skip()
       : croak(
-          `Invalid token ${token.text} at line: ${token.line}, col: ${token.col}`
+          `Invalid token ${token.text}${
+            expected ? ", expected " + expected : ""
+          } at line: ${token.line}, col: ${token.col}`
         );
+  const skipNewlines = () => {
+    while (matchNl(peek())) {
+      skip();
+    }
+  };
 
-  const parseAtom = () => {};
+  const maybeBinary = () => {};
+
+  const parseCall = (func) => {};
+
+  const maybeCall = (expr) => {
+    expr = expr();
+    return matchLparen(peek()) ? parseCall(expr) : expr;
+  };
+
+  const parseAtom = () => {
+    let tok = peek();
+
+    return maybeCall(() => {
+      if (matchLparen(tok)) {
+        skip();
+
+        const expr = parseExpr();
+
+        skipIf(matchRparen, ")");
+
+        return expr;
+      }
+
+      skip();
+
+      if (matchNumTok(tok)) {
+        return Number({
+          node: "Number",
+          value: tok.value,
+          loc: { line: tok.line, col: tok.col },
+        });
+      }
+    });
+  };
 
   const parseExpr = () => {};
 
+  /**
+   * expression -> expr exprterm
+   */
+  const parseExpression = () => {
+    const expr = parseExpr();
+
+    // enforce having either a newline or semicolon between expressions
+    if (!eof()) {
+      skipIf(matchExpTerm, "newline or ;");
+    }
+
+    skipNewlines(); // to allow for blank lines between expressions
+
+    return expr;
+  };
+
+  /**
+   * program -> expression*
+   */
   const parseProgram = () => {
     const start = input[0] ? { line: input[0].line, col: input[0].col } : null;
     const last = input[input.length - 1];
     const end = last ? { line: last.line, col: last.col } : null;
     let prog = [];
 
+    skipNewlines(); // in case there are blank lines at the top of the input
+
     while (!eof()) {
-      prog.push(parseExpr());
-      if (!eof()) {
-        skipIf(matchExpTerm);
-      }
-      while (matchNl(peek())) {
-        skip();
-      }
+      prog.push(parseExpression());
     }
 
     return Program({

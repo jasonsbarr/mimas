@@ -122,6 +122,7 @@ const tokens = {
           "if",
           "then",
           "else",
+          "unless",
           "is",
           "fun",
           "when",

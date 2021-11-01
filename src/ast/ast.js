@@ -18,7 +18,19 @@ const variantInfos = [
       }`;
     },
   }),
+  /**
+   * Number of {
+   *   node: string,
+   *   value: number,
+   *   loc: {line: number, col: number}
+   * }
+   */
+  VariantInfo("Number", [], {
+    toString() {
+      return `{ node: ${this.node}, value: ${this.value} }`;
+    },
+  }),
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program } = Ast;
+export const { Program, Number } = Ast;
