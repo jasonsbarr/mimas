@@ -341,6 +341,7 @@ const parse = (input) => {
    *  | nil
    *  | Var
    *  | Apply
+   *  | Assign // returns nil
    */
   const parseAtom = () => {
     let tok = peek();
