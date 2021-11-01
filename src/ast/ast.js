@@ -52,7 +52,7 @@ const variantInfos = [
    */
   VariantInfo("Var"),
   /**
-   * Apply - represents a function application
+   * Apply - represents a unary function application
    * Apply of {
    *   node: string,
    *   func: Ast,
@@ -61,7 +61,17 @@ const variantInfos = [
    * }
    */
   VariantInfo("Apply"),
+  /**
+   * BinOp - represents a binary operation
+   * BinOp of {
+   *   node: string,
+   *   left: Ast,
+   *   op: string,
+   *   loc: { line: number, col: number }
+   * }
+   */
+  VariantInfo("BinOp"),
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program, Num, Str, Bool, Nil, Var, Apply } = Ast;
+export const { Program, Num, Str, Bool, Nil, Var, Apply, BinOp } = Ast;
