@@ -180,6 +180,21 @@ const matchUnOp = (token) =>
   matchHash(token) ||
   matchAt(token);
 
+const matchPunc = (token) =>
+  matchComma(token) ||
+  matchColon(token) ||
+  matchOptch(token) ||
+  matchDot(token) ||
+  matchQuote(token) ||
+  matchTick(token) ||
+  matchLparen(token) ||
+  matchRparen(token) ||
+  matchLbracket(token) ||
+  matchRbracket(token) ||
+  matchLbrace(token) ||
+  matchRbrace(token) ||
+  matchQuest(token);
+
 const precedence = {
   "=": 5, // binding
   ":=": 5, // assignment
@@ -216,15 +231,56 @@ const precedence = {
 };
 
 const parse = (input) => {
-  let pos = -1;
+  let pos = 0;
   let saved = -1;
   let buffer = [];
+
+  const next = () => input[++pos];
+  const skip = () => ++pos;
+  const resetBuffer = () => (buffer = []);
+  const resetSaved = () => (saved = -1);
+  const peek = () => input[pos];
+  const lookahead = (lh) => input[pos + lh] ?? null;
+  const eof = () => matchEof(peek());
+  const croak = (message) => {
+    throw new SyntaxError(message);
+  };
+  const skipIf = (pred) =>
+    pred(peek())
+      ? skip()
+      : croak(
+          `Invalid token ${token.text} at line: ${token.line}, col: ${token.col}`
+        );
 
   const parseAtom = () => {};
 
   const parseExpr = () => {};
 
-  const parseProgram = () => {};
+  const parseProgram = () => {
+    const start = input[0] ? { line: input[0].line, col: input[0].col } : null;
+    const last = input[input.length - 1];
+    const end = last ? { line: last.line, col: last.col } : null;
+    let prog = [];
+
+    while (!eof()) {
+      prog.push(parseExpr());
+      if (!eof()) {
+        skipIf(matchExpTerm);
+      }
+      while (matchNl(peek())) {
+        skip();
+      }
+    }
+
+    return Program({
+      node: "Program",
+      prog,
+      start,
+      end,
+    });
+  };
+
+  return parseProgram();
 };
 
 export default (code) => pipeline(code, raw, eof, lex, parse);
