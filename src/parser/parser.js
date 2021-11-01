@@ -251,9 +251,9 @@ const parse = (input) => {
     pred(peek())
       ? skip()
       : croak(
-          `Invalid token ${token.text}${
+          `Invalid token ${peek().text}${
             expected ? ", expected " + expected : ""
-          } at line: ${token.line}, col: ${token.col}`
+          } at line: ${peek().line}, col: ${peek().col}`
         );
   const skipNewlines = () => {
     while (matchNl(peek())) {
