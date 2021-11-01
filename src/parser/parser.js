@@ -49,7 +49,6 @@ const matchImport = match("import");
 const matchFrom = match("from");
 const matchOpen = match("open");
 const matchArrow = match("arrow");
-const matchFatarrow = match("fatarrow");
 const matchPipe = match("pipe");
 const matchConcat = match("concat");
 const matchCons = match("cons");
@@ -90,11 +89,13 @@ const matchQuote = match("quote");
 const matchTick = match("tick");
 const matchAt = match("at");
 const matchComma = match("comma");
+const matchOptch = match("optch");
 const matchSpread = match("spread");
 const matchDoubledot = match("doubledot");
 const matchDot = match("dot");
 const matchQuest = match("quest");
 const matchBang = match("bang");
+const matchHash = match("hash");
 
 // match token categories
 const matchExpTerm = (token) =>
@@ -136,9 +137,9 @@ const matchKeyword = (token) =>
   matchOpen(token);
 
 const matchBinOp = (token) =>
+  matchIn(token) ||
   matchIs(token) ||
   matchArrow(token) ||
-  matchFatarrow(token) ||
   matchPipe(token) ||
   matchConcat(token) ||
   matchCons(token) ||
@@ -175,16 +176,55 @@ const matchUnOp = (token) =>
   matchMul(token) ||
   matchBwnot(token) ||
   matchSpread(token) ||
-  matchBang(token);
+  matchBang(token) ||
+  matchHash(token) ||
+  matchAt(token);
 
-const parse = (tokens) => {
+const precedence = {
+  "=": 5, // binding
+  ":=": 5, // assignment
+  "??": 10, // nullish coalescing
+  "||": 15, // logical or
+  "&&": 20, // logical and
+  "|": 25, // bitwise or
+  "^": 30, // bitwise not
+  "&": 35, // bitwise and
+  "!=": 40, // not equal (structural equality)
+  "==": 40, // structural equality
+  is: 40, // reference equality
+  in: 45, // is a member of
+  ">": 45, // greater than
+  "<": 45, // less than
+  "<=": 45, // less than or equal to
+  ">=": 45, // greater than or equal to
+  ">>>": 50, // bitwise right shift
+  "<<<": 50, // bitwise left shift
+  "+": 55, // addition
+  "++": 55, // concatenate strings
+  "@": 55, // concatenate lists
+  "-": 55, // subtraction
+  "*": 60, // multiplication
+  "/": 60, // division
+  "//": 60, // integer division
+  "%": 60, // remainder
+  "::": 60, // cons
+  "**": 65, // exponentiation
+  "|>": 65, // pipe forward
+  ">>": 65, // compose right
+  "<<": 65, // compose left
+  "->": 70, // lambda application
+};
+
+const parse = (input) => {
   let pos = -1;
+  let saved = -1;
+  let buffer = [];
 
-  const parseAtom = {};
+  const parseAtom = () => {};
 
-  const parseExpr = {};
+  const parseExpr = () => {};
 
-  const parseProgram = {};
+  const parseProgram = () => {};
 };
 
 export default (code) => pipeline(code, raw, eof, lex, parse);

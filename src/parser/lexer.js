@@ -80,7 +80,7 @@ const readString = (raw) => {
 const tokens = {
   WS: /[ \t]/u,
   NL: { match: /\r?\n|\r/u, lineBreaks: true },
-  comment: /#.*/u,
+  comment: /;;.*/u,
   number: [
     {
       match: /[1-9]\d*\.\d*[eE][\+-]?\d+/u,
@@ -151,7 +151,6 @@ const tokens = {
   ],
   eof: { match: "<*endofinput*>", value: () => Symbol.for("end of input") },
   arrow: /->/u,
-  fatarrow: "=>",
   pipe: "|>",
   concat: "++",
   cons: "::",
@@ -193,11 +192,13 @@ const tokens = {
   tick: "`",
   at: "@",
   comma: ",",
+  optch: "?.",
   spread: /\.\.\./u,
   doubledot: /\.\./u,
   dot: /\./u,
   quest: "?",
   bang: "!",
+  hash: "#",
 };
 
 export default moo.compile(tokens);
