@@ -10,12 +10,7 @@ const variantInfos = [
   //   start: {line: number, col: number},
   //   end: {line: number, col: number}
   // }
-  VariantInfo("Program", [], {
-    toString() {
-      const value = this.value;
-      return ``;
-    },
-  }),
+  VariantInfo("Program"),
   /**
    * Number of {
    *   node: string,
@@ -23,12 +18,7 @@ const variantInfos = [
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Num", [], {
-    toString() {
-      const value = this.value;
-      return `{ node: ${value.node}, value: ${value.value} }`;
-    },
-  }),
+  VariantInfo("Num"),
   /**
    * String of {
    *   node: string,
@@ -36,12 +26,7 @@ const variantInfos = [
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Str", [], {
-    toString() {
-      const value = this.value;
-      return `{ node: ${value.node}, value: ${value.value} }`;
-    },
-  }),
+  VariantInfo("Str"),
   /**
    * Boolean of {
    *   node: string,
@@ -49,12 +34,7 @@ const variantInfos = [
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Bool", [], {
-    toString() {
-      const value = this.value;
-      return `{ node: ${value.node}, value: ${value.value} }`;
-    },
-  }),
+  VariantInfo("Bool"),
   /**
    * Nil of {
    *   node: string,
@@ -62,12 +42,7 @@ const variantInfos = [
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Nil", [], {
-    toString() {
-      const value = this.value;
-      return `{ node: ${value.node}, value: ${value.value} }`;
-    },
-  }),
+  VariantInfo("Nil"),
   /**
    * Var of {
    *   node: string,
@@ -75,12 +50,7 @@ const variantInfos = [
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Var", [], {
-    toString() {
-      const value = this.value;
-      return `{ node: ${value.node}, value: ${value.value} }`;
-    },
-  }),
+  VariantInfo("Var"),
   /**
    * Apply - represents a function application
    * Apply of {
@@ -90,16 +60,7 @@ const variantInfos = [
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Apply", [], {
-    toString() {
-      const value = this.value;
-      return JSON.stringify(
-        { node: "Apply", func: value.func, arg: value.arg },
-        2,
-        null
-      );
-    },
-  }),
+  VariantInfo("Apply"),
 ];
 
 export const Ast = createType("Ast", variantInfos);
