@@ -1,6 +1,6 @@
 import { pipeline } from "@jasonsbarr/functional-core/lib/lambda/pipeline.js";
 import lexer from "./lexer.js";
-import { Program, Num, Str, Bool, Nil, Var, Apply } from "../ast/ast.js";
+import { Program, Num, Str, Bool, Nil, Var, Apply, BinOp } from "../ast/ast.js";
 
 import { first, last } from "./helpers.js";
 
@@ -45,8 +45,6 @@ const matchModule = match("module");
 const matchPrivate = match("private");
 const matchMutable = match("mutable");
 const matchNot = match("not");
-const matchBegin = match("begin");
-const matchEnd = match("end");
 const matchAs = match("as");
 const matchImport = match("import");
 const matchFrom = match("from");
@@ -133,8 +131,6 @@ const matchKeyword = (token) =>
   matchPrivate(token) ||
   matchMutable(token) ||
   matchNot(token) ||
-  matchBegin(token) ||
-  matchEnd(token) ||
   matchAs(token) ||
   matchImport(token) ||
   matchFrom(token) ||
