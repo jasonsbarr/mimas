@@ -137,6 +137,7 @@ const matchKeyword = (token) =>
   matchOpen(token);
 
 const matchBinOp = (token) =>
+  matchAssign(token) ||
   matchIn(token) ||
   matchIs(token) ||
   matchArrow(token) ||
@@ -166,8 +167,6 @@ const matchBinOp = (token) =>
   matchGte(token) ||
   matchEq(token) ||
   matchNe(token) ||
-  matchAssign(token) ||
-  matchBind(token) ||
   matchAt(token);
 
 const matchUnOp = (token) =>
@@ -204,7 +203,8 @@ const makePrimNode = (name, token) => ({
 });
 
 const precedence = {
-  "=": 5, // binding
+  // this gets its own node
+  // "=": 5, // binding
   ":=": 5, // assignment
   "??": 10, // nullish coalescing
   "||": 15, // logical or
@@ -267,7 +267,25 @@ const parse = (input) => {
     }
   };
 
-  const maybeBinary = (left, prec) => {
+  const maybeBinary = (left, prec = 0) => {
+    let tok = peek();
+
+    if (matchBinOp(tok)) {
+      var otherPrec = precedence[tok.value];
+
+      if (otherPrec > prec) {
+        skip(); // skip over operator token
+
+        return maybeBinary({
+          node: matchAssign(tok) ? "Assign" : "BinOp",
+          op: tok.value,
+          left,
+          right: maybeBinary(parseExpr(), otherPrec),
+          loc: left.loc,
+        });
+      }
+    }
+
     return left;
   };
 
@@ -369,6 +387,7 @@ const parse = (input) => {
   /**
    * expr ->
    *    atom
+   *  | BinOp
    */
   const parseExpr = ({ tuple = false } = {}) => {
     const expr = maybeBinary(parseAtom(), 0);
