@@ -27,7 +27,7 @@ ${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Number", [], {
+  VariantInfo("Num", [], {
     toString() {
       const value = this.value;
       return `{ node: ${value.node}, value: ${value.value} }`;
@@ -40,7 +40,7 @@ ${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("String", [], {
+  VariantInfo("Str", [], {
     toString() {
       const value = this.value;
       return `{ node: ${value.node}, value: ${value.value} }`;
@@ -53,7 +53,7 @@ ${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
    *   loc: {line: number, col: number}
    * }
    */
-  VariantInfo("Boolean", [], {
+  VariantInfo("Bool", [], {
     toString() {
       const value = this.value;
       return `{ node: ${value.node}, value: ${value.value} }`;
@@ -103,4 +103,4 @@ ${value.prog.reduce((str, n) => str + "    " + n.toString() + ",\n", "")}  ]
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program, Number, String, Boolean, Nil, Var, Apply } = Ast;
+export const { Program, Num, Str, Bool, Nil, Var, Apply } = Ast;

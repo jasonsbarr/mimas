@@ -1,14 +1,6 @@
 import { pipeline } from "@jasonsbarr/functional-core/lib/lambda/pipeline.js";
 import lexer from "./lexer.js";
-import {
-  Program,
-  Number,
-  String,
-  Boolean,
-  Nil,
-  Var,
-  Apply,
-} from "../ast/ast.js";
+import { Program, Num, Str, Bool, Nil, Var, Apply } from "../ast/ast.js";
 
 import { first, last } from "./helpers.js";
 
@@ -350,15 +342,15 @@ const parse = (input) => {
       skip();
 
       if (matchNumTok(tok)) {
-        return Number(makePrimNode("Number", tok));
+        return Num(makePrimNode("Number", tok));
       }
 
       if (matchString(tok)) {
-        return String(makePrimNode("String", tok));
+        return Str(makePrimNode("String", tok));
       }
 
       if (matchBool(tok)) {
-        return Boolean(makePrimNode("Boolean", tok));
+        return Bool(makePrimNode("Boolean", tok));
       }
 
       if (matchNil(tok)) {
