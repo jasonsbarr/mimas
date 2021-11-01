@@ -12,10 +12,12 @@ const variantInfos = [
   // }
   VariantInfo("Program", [], {
     toString() {
+      const value = this.value;
       return `{
-        node: ${this.node},
-        prog: [${this.prog.toString()}]
-      }`;
+  node: ${value.node},
+  prog: [
+          ${value.prog.reduce((str, n) => str + n.toString() + ",\n", "")}  ]
+}`;
     },
   }),
   /**
@@ -27,7 +29,8 @@ const variantInfos = [
    */
   VariantInfo("Number", [], {
     toString() {
-      return `{ node: ${this.node}, value: ${this.value} }`;
+      const value = this.value;
+      return `{ node: ${value.node}, value: ${value.value} }`;
     },
   }),
 ];

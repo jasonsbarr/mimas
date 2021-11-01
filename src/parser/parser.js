@@ -261,7 +261,9 @@ const parse = (input) => {
     }
   };
 
-  const maybeBinary = () => {};
+  const maybeBinary = (left, prec) => {
+    return left;
+  };
 
   const parseCall = (func) => {};
 
@@ -270,6 +272,10 @@ const parse = (input) => {
     return matchLparen(peek()) ? parseCall(expr) : expr;
   };
 
+  /**
+   * atom ->
+   *    number
+   */
   const parseAtom = () => {
     let tok = peek();
 
@@ -296,7 +302,13 @@ const parse = (input) => {
     });
   };
 
-  const parseExpr = () => {};
+  /**
+   * expr ->
+   *    atom
+   */
+  const parseExpr = () => {
+    return maybeCall(() => maybeBinary(parseAtom(), 0));
+  };
 
   /**
    * expression -> expr exprterm
