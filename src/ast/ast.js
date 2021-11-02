@@ -67,7 +67,7 @@ const variantInfos = [
   /**
    * Assign - represents a mutable variable assignment
    * Assign of {
-   *   name: string,
+   *   name: Ast,
    *   expr: Ast,
    *   loc: { line: number, col: number }
    * }
@@ -82,8 +82,30 @@ const variantInfos = [
    * }
    */
   VariantInfo("UnOp"),
+  /**
+   * VarDecl - represents a variable declaration
+   * VarDecl of {
+   *   name: Ast,
+   *   type: string
+   *   mutable: boolean
+   *   expr: Ast,
+   *   loc: { line: number, col: number }
+   * }
+   */
+  VariantInfo("VarDecl"),
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program, Num, Str, Bool, Nil, Var, Apply, BinOp, Assign, UnOp } =
-  Ast;
+export const {
+  Program,
+  Num,
+  Str,
+  Bool,
+  Nil,
+  Var,
+  Apply,
+  BinOp,
+  Assign,
+  UnOp,
+  VarDecl,
+} = Ast;

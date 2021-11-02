@@ -11,6 +11,7 @@ import {
   BinOp,
   Assign,
   UnOp,
+  VarDecl,
 } from "../ast/ast.js";
 
 import { first, last } from "./helpers.js";
@@ -282,8 +283,8 @@ const parse = (input) => {
 
     if (matchAssign(tok)) {
       return Assign({
-        name: left.value,
-        expr: maybeBinary(parseExpr(), 5),
+        name: left,
+        expr: maybeBinary(parseExpr(), precedence[tok.value]),
       });
     }
 
@@ -373,7 +374,6 @@ const parse = (input) => {
    *  | nil
    *  | Var
    *  | Apply
-   *  | Assign // returns nil
    */
   const parseAtom = () => {
     let tok = peek();
@@ -394,23 +394,24 @@ const parse = (input) => {
       skip();
 
       if (matchNumTok(tok)) {
-        return Num(makePrimNode("Number", tok));
+        console.log(tok);
+        return Num(makePrimNode(tok));
       }
 
       if (matchString(tok)) {
-        return Str(makePrimNode("String", tok));
+        return Str(makePrimNode(tok));
       }
 
       if (matchBool(tok)) {
-        return Bool(makePrimNode("Boolean", tok));
+        return Bool(makePrimNode(tok));
       }
 
       if (matchNil(tok)) {
-        return Nil(makePrimNode("Nil", tok));
+        return Nil(makePrimNode(tok));
       }
 
       if (matchIdentifier(tok)) {
-        return Var(makePrimNode("Var", tok));
+        return Var(makePrimNode(tok));
       }
 
       croak(`Unknown token ${tok.value} at line: ${tok.line}, col: ${tok.col}`);
@@ -418,13 +419,108 @@ const parse = (input) => {
   };
 
   /**
+   * typeAnnotation -> colon Var
+   */
+  const parseTypeAnnotation = () => {
+    let tok = peek();
+
+    skipIf(
+      matchColon,
+      `Expected ':', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+    );
+
+    tok = peek();
+
+    if (!matchIdentifier(peek())) {
+      croak(
+        `Expected type identifier, got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+      );
+    }
+
+    // skip token to advance the stream
+    skip();
+
+    return tok.value;
+  };
+
+  /**
+   * VarDecl ->
+   *    let modifier? Var typeAnnotation? '=' expr
+   */
+  const parseLet = () => {
+    const tok = peek();
+    let mutable = false;
+    const loc = { line: tok.line, col: tok.col };
+
+    // skip let
+    skip();
+
+    if (matchMutable(peek())) {
+      mutable = true;
+
+      // skip mutable
+      skip();
+    }
+
+    if (!matchIdentifier(peek())) {
+      croak(
+        `Expected identifier, got ${peek().value} at line: ${
+          peek().line
+        }, col: ${peek().col}`
+      );
+    }
+
+    const name = parseExpr();
+
+    let type = null;
+
+    if (matchColon(peek())) {
+      type = parseTypeAnnotation();
+    }
+
+    skipIf(
+      matchBind,
+      `Expected '=', got ${peek().value} at line: ${peek().line}, col: ${
+        peek().col
+      }`
+    );
+
+    return VarDecl({
+      name,
+      mutable,
+      type,
+      expr: parseExpr(),
+    });
+  };
+
+  const parseKeyword = () => {
+    const tok = peek();
+
+    switch (tok.type) {
+      case "let":
+        return parseLet();
+
+      default:
+        croak(
+          `Unrecognized token ${tok.type} at line: ${tok.line}, col: ${tok.col}`
+        );
+    }
+  };
+
+  /**
    * expr ->
    *    atom
    *  | BinOp
+   *  | Assign
    *  | UnOp
+   *  | VarDecl
    */
   const parseExpr = ({ tuple = true } = {}) => {
     const tok = peek();
+
+    if (matchKeyword(tok)) {
+      return parseKeyword();
+    }
 
     if (matchUnOp(tok)) {
       return maybeCall(() => maybeBinary(parseUnary(), 0));
