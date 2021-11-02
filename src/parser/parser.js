@@ -9,6 +9,7 @@ import {
   Var,
   Apply,
   BinOp,
+  Assign,
   UnOp,
 } from "../ast/ast.js";
 
@@ -206,8 +207,7 @@ const matchPunc = (token) =>
   matchQuest(token);
 
 const makePoint = (token) => ({ line: token.line, col: token.col });
-const makePrimNode = (name, token) => ({
-  node: name,
+const makePrimNode = (token) => ({
   value: token.value,
   loc: makePoint(token),
 });
@@ -280,6 +280,13 @@ const parse = (input) => {
   const maybeBinary = (left, prec = 0) => {
     let tok = peek();
 
+    if (matchAssign(tok)) {
+      return Assign({
+        name: left.value,
+        expr: maybeBinary(parseExpr(), 5),
+      });
+    }
+
     if (matchBinOp(tok)) {
       var otherPrec = precedence[tok.value];
 
@@ -288,7 +295,6 @@ const parse = (input) => {
 
         return maybeBinary(
           BinOp({
-            node: matchAssign(tok) ? "Assign" : "BinOp",
             op: tok.value,
             left,
             right: maybeBinary(parseExpr(), otherPrec),
@@ -320,19 +326,16 @@ const parse = (input) => {
     const makeApply = (func, args) =>
       args.length === 0
         ? Apply({
-            node: "Apply",
             func,
             arg: null,
             loc: func.loc,
           })
         : args.length === 1
         ? Apply({
-            node: "Apply",
             func,
             arg: first(args),
           })
         : Apply({
-            node: "Apply",
             arg: last(args),
             func: makeApply(func, args.slice(0, -1)),
           });
@@ -352,7 +355,6 @@ const parse = (input) => {
     skip();
 
     return UnOp({
-      node: "UnOp",
       op: tok.value,
       operand: parseExpr(),
       loc: {

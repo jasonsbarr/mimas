@@ -13,7 +13,6 @@ const variantInfos = [
   VariantInfo("Program"),
   /**
    * Number of {
-   *   node: string,
    *   value: number,
    *   loc: {line: number, col: number}
    * }
@@ -21,7 +20,6 @@ const variantInfos = [
   VariantInfo("Num"),
   /**
    * String of {
-   *   node: string,
    *   value: string,
    *   loc: {line: number, col: number}
    * }
@@ -29,7 +27,6 @@ const variantInfos = [
   VariantInfo("Str"),
   /**
    * Boolean of {
-   *   node: string,
    *   value: string,
    *   loc: {line: number, col: number}
    * }
@@ -37,7 +34,6 @@ const variantInfos = [
   VariantInfo("Bool"),
   /**
    * Nil of {
-   *   node: string,
    *   value: string,
    *   loc: {line: number, col: number}
    * }
@@ -45,7 +41,6 @@ const variantInfos = [
   VariantInfo("Nil"),
   /**
    * Var of {
-   *   node: string,
    *   value: string,
    *   loc: {line: number, col: number}
    * }
@@ -54,7 +49,6 @@ const variantInfos = [
   /**
    * Apply - represents a unary function application
    * Apply of {
-   *   node: string,
    *   func: Ast,
    *   arg: Ast,
    *   loc: {line: number, col: number}
@@ -64,7 +58,6 @@ const variantInfos = [
   /**
    * BinOp - represents a binary operation
    * BinOp of {
-   *   node: string,
    *   left: Ast,
    *   op: string,
    *   loc: { line: number, col: number }
@@ -72,9 +65,17 @@ const variantInfos = [
    */
   VariantInfo("BinOp"),
   /**
+   * Assign - represents a mutable variable assignment
+   * Assign of {
+   *   name: string,
+   *   expr: Ast,
+   *   loc: { line: number, col: number }
+   * }
+   */
+  VariantInfo("Assign"),
+  /**
    * UnOp - represents a unary operation
    * UnOp of {
-   *   node: string,
    *   op: string,
    *   operand: Ast,
    *   loc: { line: number, col: number }
@@ -84,4 +85,5 @@ const variantInfos = [
 ];
 
 export const Ast = createType("Ast", variantInfos);
-export const { Program, Num, Str, Bool, Nil, Var, Apply, BinOp, UnOp } = Ast;
+export const { Program, Num, Str, Bool, Nil, Var, Apply, BinOp, Assign, UnOp } =
+  Ast;
