@@ -149,7 +149,7 @@ const tokens = {
     { match: /"""[\s\S]*"""/u, value: (s) => readString(s).slice(2, -2) },
     { match: /".*"/u, value: (s) => readString(s) },
   ],
-  eof: { match: "<*endofinput*>", value: () => Symbol.for("end of input") },
+  eof: { match: "<*endofinput*>", value: "end of input" },
   arrow: /->/u,
   pipe: "|>",
   concat: "++",

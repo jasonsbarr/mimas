@@ -12,6 +12,7 @@ import {
   Assign,
   UnOp,
   VarDecl,
+  Func,
 } from "../ast/ast.js";
 
 import { first, last } from "./helpers.js";
@@ -151,7 +152,6 @@ const matchBinOp = (token) =>
   matchAssign(token) ||
   matchIn(token) ||
   matchIs(token) ||
-  matchArrow(token) ||
   matchPipe(token) ||
   matchConcat(token) ||
   matchCons(token) ||
@@ -246,7 +246,6 @@ const precedence = {
   "|>": 65, // pipe forward
   ">>": 65, // compose right
   "<<": 65, // compose left
-  "->": 70, // lambda application
 };
 
 const parse = (input) => {
@@ -394,7 +393,6 @@ const parse = (input) => {
       skip();
 
       if (matchNumTok(tok)) {
-        console.log(tok);
         return Num(makePrimNode(tok));
       }
 
@@ -448,7 +446,7 @@ const parse = (input) => {
    *    let modifier? Var typeAnnotation? '=' expr
    */
   const parseLet = () => {
-    const tok = peek();
+    let tok = peek();
     let mutable = false;
     const loc = { line: tok.line, col: tok.col };
 
@@ -462,11 +460,11 @@ const parse = (input) => {
       skip();
     }
 
-    if (!matchIdentifier(peek())) {
+    tok = peek();
+
+    if (!matchIdentifier(tok)) {
       croak(
-        `Expected identifier, got ${peek().value} at line: ${
-          peek().line
-        }, col: ${peek().col}`
+        `Expected identifier, got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
       );
     }
 
@@ -476,6 +474,7 @@ const parse = (input) => {
 
     if (matchColon(peek())) {
       type = parseTypeAnnotation();
+      name.type = type;
     }
 
     skipIf(
@@ -490,7 +489,115 @@ const parse = (input) => {
       mutable,
       type,
       expr: parseExpr(),
+      loc,
     });
+  };
+
+  /**
+   * paramList ->
+   *    identifier typeAnnotation?
+   *  | identifier typeAnnotation? comma paramList
+   *  | '()
+   */
+  const parseParamList = (args = []) => {
+    let tok = peek();
+
+    skipIf(
+      matchLparen,
+      `Expected '(', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+    );
+
+    tok = peek();
+
+    while (!matchRparen(tok)) {
+      let arg = parseExpr({ tuple: false });
+      let type = null;
+
+      if (matchColon(peek())) {
+        type = parseTypeAnnotation();
+      }
+
+      arg.value.type = type;
+      args.push(arg);
+      tok = peek();
+
+      if (matchComma(tok)) {
+        tok = next();
+      }
+    }
+
+    skipIf(
+      matchRparen,
+      `Expected ')', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+    );
+
+    return args;
+  };
+
+  const makeFunc = (body, returnType, loc, args) =>
+    args.length === 0
+      ? Func({
+          arg: null,
+          body,
+          type: returnType,
+          loc,
+        })
+      : args.length === 1
+      ? Func({
+          arg: args[0],
+          body,
+          type: returnType,
+          loc,
+        })
+      : Func({
+          arg: args[0],
+          type: null,
+          body: makeFunc(body, returnType, loc, args.slice(1)),
+          loc,
+        });
+
+  /**
+   * Func ->
+   *    fun identifier '->' expr
+   *  | fun '(' paramList ')' typeAnnotation? '->' expr
+   */
+  const parseFun = () => {
+    let tok = peek();
+    const loc = { line: tok.line, col: tok.col };
+
+    // skip fun
+    tok = next();
+
+    if (!matchLparen(tok) && !matchIdentifier(tok)) {
+      croak(
+        `Expecting '(' or identifier, got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+      );
+    }
+
+    let args = [];
+
+    if (matchIdentifier(tok)) {
+      args.push(parseExpr());
+    } else if (matchLparen(tok)) {
+      args = parseParamList();
+    }
+
+    tok = peek();
+
+    let type = null;
+
+    if (matchColon(tok)) {
+      type = parseTypeAnnotation();
+    }
+
+    skipIf(
+      matchArrow,
+      `Expected '->', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+    );
+
+    const body = parseExpr();
+
+    return makeFunc(body, type, loc, args);
   };
 
   const parseKeyword = () => {
@@ -499,6 +606,9 @@ const parse = (input) => {
     switch (tok.type) {
       case "let":
         return parseLet();
+
+      case "fun":
+        return parseFun();
 
       default:
         croak(
@@ -569,7 +679,6 @@ const parse = (input) => {
     }
 
     return Program({
-      node: "Program",
       prog,
       start,
       end,

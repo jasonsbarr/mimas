@@ -51,6 +51,7 @@ const variantInfos = [
    * Apply of {
    *   func: Ast,
    *   arg: Ast,
+   *   type: string | null
    *   loc: {line: number, col: number}
    * }
    */
@@ -93,6 +94,15 @@ const variantInfos = [
    * }
    */
   VariantInfo("VarDecl"),
+  /**
+   * Func - represents a unary function expression
+   * Func of {
+   *   arg: Ast,
+   *   body: Ast,
+   *   loc: { line: number, col: number }
+   * }
+   */
+  VariantInfo("Func"),
 ];
 
 export const Ast = createType("Ast", variantInfos);
@@ -108,4 +118,5 @@ export const {
   Assign,
   UnOp,
   VarDecl,
+  Func,
 } = Ast;
