@@ -50,6 +50,7 @@ const matchUnless = match("unless");
 const matchIs = match("is");
 const matchFun = match("fun");
 const matchWhen = match("when");
+const matchDo = match("do");
 const matchFor = match("for");
 const matchWhile = match("while");
 const matchType = match("type");
@@ -136,6 +137,7 @@ const matchKeyword = (token) =>
   matchIs(token) ||
   matchFun(token) ||
   matchWhen(token) ||
+  matchDo(token) ||
   matchFor(token) ||
   matchWhile(token) ||
   matchType(token) ||

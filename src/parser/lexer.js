@@ -126,6 +126,7 @@ const tokens = {
           "is",
           "fun",
           "when",
+          "do",
           "for",
           "while",
           "type",
