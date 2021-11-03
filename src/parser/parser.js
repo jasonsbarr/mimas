@@ -51,6 +51,7 @@ const matchIs = match("is");
 const matchFun = match("fun");
 const matchWhen = match("when");
 const matchDo = match("do");
+const matchEnd = match("end");
 const matchFor = match("for");
 const matchWhile = match("while");
 const matchType = match("type");
@@ -138,6 +139,7 @@ const matchKeyword = (token) =>
   matchFun(token) ||
   matchWhen(token) ||
   matchDo(token) ||
+  matchEnd(token) ||
   matchFor(token) ||
   matchWhile(token) ||
   matchType(token) ||
