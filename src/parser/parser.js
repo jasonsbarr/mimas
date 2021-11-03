@@ -338,10 +338,12 @@ const parse = (input) => {
         ? Apply({
             func,
             arg: first(args),
+            loc: func.loc,
           })
         : Apply({
             arg: last(args),
             func: makeApply(func, args.slice(0, -1)),
+            loc: func.loc,
           });
 
     return makeApply(func, args);
