@@ -88,7 +88,8 @@ const variantInfos = [
    * VarDecl of {
    *   name: Ast,
    *   type: string
-   *   mutable: boolean
+   *   mutable: boolean,
+   *   recursive: boolean,
    *   expr: Ast,
    *   loc: { line: number, col: number }
    * }
@@ -103,6 +104,18 @@ const variantInfos = [
    * }
    */
   VariantInfo("Func"),
+  /**
+   * LetExpr - represents a let expression with a block
+   * LetExpr of {
+   *   name: Ast,
+   *   type: string
+   *   mutable: boolean,
+   *   recursive: boolean,
+   *   expr: Ast,
+   *   body: Ast,
+   *   loc: { line: number, col: number }
+   * }
+   */ VariantInfo("LetExpr"),
 ];
 
 export const Ast = createType("Ast", variantInfos);
@@ -119,4 +132,5 @@ export const {
   UnOp,
   VarDecl,
   Func,
+  LetExpr,
 } = Ast;

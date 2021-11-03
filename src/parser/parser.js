@@ -13,6 +13,7 @@ import {
   UnOp,
   VarDecl,
   Func,
+  LetExpr,
 } from "../ast/ast.js";
 
 import { first, last } from "./helpers.js";
@@ -154,7 +155,6 @@ const matchKeyword = (token) =>
 
 const matchBinOp = (token) =>
   matchAssign(token) ||
-  matchIn(token) ||
   matchIs(token) ||
   matchPipe(token) ||
   matchConcat(token) ||
@@ -381,6 +381,11 @@ const parse = (input) => {
   const parseAtom = () => {
     let tok = peek();
 
+    if (matchComment(tok)) {
+      // skip comment and get next token
+      tok = next();
+    }
+
     return maybeCall(() => {
       if (matchLparen(tok)) {
         // parenthesized expression
@@ -452,10 +457,18 @@ const parse = (input) => {
   const parseLet = () => {
     let tok = peek();
     let mutable = false;
+    let recursive = false;
     const loc = { line: tok.line, col: tok.col };
 
     // skip let
     skip();
+
+    if (matchRec(peek())) {
+      recursive = true;
+
+      // skip rec
+      skip();
+    }
 
     if (matchMutable(peek())) {
       mutable = true;
@@ -488,11 +501,29 @@ const parse = (input) => {
       }`
     );
 
+    const expr = parseExpr();
+
+    if (matchIn(peek())) {
+      // skip in
+      skip();
+
+      return LetExpr({
+        name,
+        mutable,
+        recursive,
+        type,
+        expr,
+        body: parseExpr(),
+        loc,
+      });
+    }
+
     return VarDecl({
       name,
       mutable,
+      recursive,
       type,
-      expr: parseExpr(),
+      expr,
       loc,
     });
   };
