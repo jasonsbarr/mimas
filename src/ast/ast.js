@@ -105,7 +105,7 @@ const variantInfos = [
    */
   VariantInfo("Func"),
   /**
-   * LetExpr - represents a let expression with a block
+   * LetExpr - represents a let expression with a body
    * LetExpr of {
    *   name: Ast,
    *   type: string
@@ -115,7 +115,18 @@ const variantInfos = [
    *   body: Ast,
    *   loc: { line: number, col: number }
    * }
-   */ VariantInfo("LetExpr"),
+   */
+  VariantInfo("LetExpr"),
+  /**
+   * IfExpr - represents an if expression
+   * IfExpr of {
+   *   cond: Ast,
+   *   then: Ast,
+   *   else: Ast,
+   *   loc: { line: number, col: number }
+   * }
+   */
+  VariantInfo("IfExpr"),
 ];
 
 export const Ast = createType("Ast", variantInfos);
@@ -133,4 +144,5 @@ export const {
   VarDecl,
   Func,
   LetExpr,
+  IfExpr,
 } = Ast;

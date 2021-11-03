@@ -14,6 +14,7 @@ import {
   VarDecl,
   Func,
   LetExpr,
+  IfExpr,
 } from "../ast/ast.js";
 
 import { first, last } from "./helpers.js";
@@ -312,6 +313,55 @@ const parse = (input) => {
     return left;
   };
 
+  /**
+   * IfExpr ->
+   *    if expr then nl? expr else nl? expr
+   */
+  const parseIf = () => {
+    let tok = peek();
+    const loc = { line: tok.line, col: tok.col };
+
+    // skip if
+    skip();
+
+    const cond = parseExpr();
+
+    tok = peek();
+
+    skipIf(
+      matchThen,
+      `Expected 'then', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+    );
+
+    // optional newline here
+    if (matchNl(peek())) {
+      // skip newline
+      skip();
+    }
+
+    const then = parseExpr();
+
+    tok = peek();
+
+    skipIf(
+      matchElse,
+      `Expected 'else', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+    );
+
+    // optional newline here
+    if (matchNl(peek())) {
+      // skip newline
+      skip();
+    }
+
+    return IfExpr({
+      cond,
+      then,
+      else: parseExpr(),
+      loc,
+    });
+  };
+
   const parseApply = (func) => {
     // skip opening paren
     let tok = next();
@@ -325,7 +375,10 @@ const parse = (input) => {
       }
     }
 
-    skipIf(matchRparen);
+    skipIf(
+      matchRparen,
+      `Expected ')', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
+    );
 
     const makeApply = (func, args) =>
       args.length === 0
@@ -454,7 +507,10 @@ const parse = (input) => {
 
   /**
    * VarDecl ->
-   *    let modifier? Var typeAnnotation? '=' expr
+   *    let rec? mutable? Var typeAnnotation? '=' expr
+   *
+   * LetExpr ->
+   *    let rec? mutable? Var typeAnnotation? '=' expr in expr
    */
   const parseLet = () => {
     let tok = peek();
@@ -647,6 +703,9 @@ const parse = (input) => {
       case "fun":
         return parseFun();
 
+      case "if":
+        return parseIf();
+
       default:
         croak(
           `Unrecognized token ${tok.type} at line: ${tok.line}, col: ${tok.col}`
@@ -661,6 +720,9 @@ const parse = (input) => {
    *  | Assign
    *  | UnOp
    *  | VarDecl
+   *  | Func
+   *  | LetExpr
+   *  | IfExpr
    */
   const parseExpr = ({ tuple = true } = {}) => {
     const tok = peek();
