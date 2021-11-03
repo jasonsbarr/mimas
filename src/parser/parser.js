@@ -328,10 +328,7 @@ const parse = (input) => {
 
     tok = peek();
 
-    skipIf(
-      matchThen,
-      `Expected 'then', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
-    );
+    skipIf(matchThen, "then");
 
     // optional newline here
     if (matchNl(peek())) {
@@ -341,12 +338,15 @@ const parse = (input) => {
 
     const then = parseExpr();
 
+    // optional newline here
+    if (matchNl(peek())) {
+      // skip newline
+      skip();
+    }
+
     tok = peek();
 
-    skipIf(
-      matchElse,
-      `Expected 'else', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
-    );
+    skipIf(matchElse, "else");
 
     // optional newline here
     if (matchNl(peek())) {
@@ -375,10 +375,7 @@ const parse = (input) => {
       }
     }
 
-    skipIf(
-      matchRparen,
-      `Expected ')', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
-    );
+    skipIf(matchRparen, ")");
 
     const makeApply = (func, args) =>
       args.length === 0
@@ -486,10 +483,7 @@ const parse = (input) => {
   const parseTypeAnnotation = () => {
     let tok = peek();
 
-    skipIf(
-      matchColon,
-      `Expected ':', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
-    );
+    skipIf(matchColon, ":");
 
     tok = peek();
 
@@ -552,12 +546,7 @@ const parse = (input) => {
       name.type = type;
     }
 
-    skipIf(
-      matchBind,
-      `Expected '=', got ${peek().value} at line: ${peek().line}, col: ${
-        peek().col
-      }`
-    );
+    skipIf(matchBind, "=");
 
     const expr = parseExpr();
 
@@ -595,10 +584,7 @@ const parse = (input) => {
   const parseParamList = (args = []) => {
     let tok = peek();
 
-    skipIf(
-      matchLparen,
-      `Expected '(', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
-    );
+    skipIf(matchLparen, "(");
 
     tok = peek();
 
@@ -619,10 +605,7 @@ const parse = (input) => {
       }
     }
 
-    skipIf(
-      matchRparen,
-      `Expected ')', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
-    );
+    skipIf(matchRparen, ")");
 
     return args;
   };
@@ -683,10 +666,7 @@ const parse = (input) => {
       type = parseTypeAnnotation();
     }
 
-    skipIf(
-      matchArrow,
-      `Expected '->', got ${tok.value} at line: ${tok.line}, col: ${tok.col}`
-    );
+    skipIf(matchArrow, "->");
 
     const body = parseExpr();
 
