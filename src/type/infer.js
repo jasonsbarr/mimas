@@ -131,3 +131,11 @@ const typToString = (typ) =>
     },
     typ
   );
+
+const makeFunctionType = (fromType, toType) =>
+  TypeOperator({ name: "->", types: [fromType, toType] });
+
+const numberType = TypeOperator({ name: "number", types: [] });
+const booltype = TypeOperator({ name: "boolean", types: [] });
+const stringType = TypeOperator({ name: "string", types: [] });
+const nilType = TypeOperator({ name: "nil", types: [] });
