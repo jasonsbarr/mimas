@@ -2,7 +2,7 @@ import { Record } from "@jasonsbarr/functional-core/lib/types/Record.js";
 import {
   createType,
   VariantInfo,
-} from "@jasonsbarr/functional-core/lib/types/createType";
+} from "@jasonsbarr/functional-core/lib/types/createType.js";
 
 /**
  * type Loc = {
