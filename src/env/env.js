@@ -4,6 +4,7 @@ export const env = (parent = null) => {
   const envObj = {
     vars: create(parent ? parent.vars : null),
     types: create(parent ? parent.types : null),
+    parent,
   };
 
   envObj.extend = () => env(envObj);
