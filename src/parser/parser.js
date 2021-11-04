@@ -719,7 +719,7 @@ const parse = (input) => {
 
     if (matchComma(peek())) {
       if (!tuple) {
-        return expr;
+        return maybeCall(() => maybeBinary(expr, 0));
       }
     }
 
