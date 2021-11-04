@@ -135,6 +135,7 @@ const typToString = (typ) =>
 const makeFunctionType = (fromType, toType) =>
   TypeOperator({ name: "->", types: [fromType, toType] });
 
+// create primitive types
 const numberType = TypeOperator({ name: "number", types: [] });
 const booltype = TypeOperator({ name: "boolean", types: [] });
 const stringType = TypeOperator({ name: "string", types: [] });
