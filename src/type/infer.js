@@ -22,6 +22,8 @@ import { identity } from "@jasonsbarr/functional-core/lib/helpers/identity.js";
 import { length } from "@jasonsbarr/functional-core/lib/array/length.js";
 import { join } from "@jasonsbarr/functional-core/lib/array/join.js";
 import { map } from "@jasonsbarr/functional-core/lib/array/map.js";
+import { any } from "@jasonsbarr/iterable/lib/any.js";
+import { env } from "../env/env.js";
 import { Expr, Ident, Lambda, ApplyFn, Let, Letrec } from "./expr.js";
 
 /**
@@ -140,3 +142,38 @@ const numberType = TypeOperator({ name: "number", types: [] });
 const booltype = TypeOperator({ name: "boolean", types: [] });
 const stringType = TypeOperator({ name: "string", types: [] });
 const nilType = TypeOperator({ name: "nil", types: [] });
+
+// Returns the currently-defining instance of t
+// As a side effect, collapses the list of type instances. The function Prune
+// is used whenever a type expression has to be inspected: it will always
+// return a type expression which is either an uninstantiated type variable or
+// a type operator; i.e. it will skip instantiated variables, and will
+// prune them from expressions to remove long chains of instantiated variables.
+const prune = (t) =>
+  switchType(Typ, {
+    TypeVariable: ({ value: { instance } }) =>
+      Option.isSome(instance) ? prune(instance) : t,
+    _: () => t,
+  });
+
+// Checks whether a type variable occurs in a type expression
+const occursInType = (v, type2) => {
+  const pruned = prune(type2);
+
+  if (eq(v, pruned)) {
+    return true;
+  }
+  return switchType(
+    Typ,
+    {
+      TypeOperator: ({ value: { types } }) => occursIn(v, types),
+      _: () => false,
+    },
+    v
+  );
+};
+
+// Checks whether a type variable occurs in any other types
+function occursIn(t, types) {
+  return any((t2) => occursInType(t, t2), types);
+}
