@@ -130,6 +130,7 @@ const tokens = {
           "end",
           "for",
           "while",
+          "until",
           "type",
           "match",
           "with",
