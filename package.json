@@ -22,10 +22,10 @@
   },
   "homepage": "https://github.com/jasonsbarr/mimas#readme",
   "dependencies": {
-    "@jasonsbarr/collections": "^0.3.3",
-    "@jasonsbarr/functional-core": "^0.3.0",
-    "@jasonsbarr/iterable": "^0.3.3",
-    "@jasonsbarr/types": "^0.3.0",
+    "@jasonsbarr/collections": "^0.4.0",
+    "@jasonsbarr/functional-core": "^0.4.0",
+    "@jasonsbarr/iterable": "^0.4.0",
+    "@jasonsbarr/types": "^0.4.0",
     "moo": "^0.5.1",
     "object-hash": "^2.2.0"
   }
