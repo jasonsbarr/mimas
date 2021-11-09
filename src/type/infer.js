@@ -17,12 +17,6 @@ import { string as str } from "@jasonsbarr/functional-core/lib/string/string.js"
 import { fromCharCode } from "@jasonsbarr/functional-core/lib/string/fromCharCode.js";
 import { charCodeAt } from "@jasonsbarr/functional-core/lib/string/charCodeAt.js";
 import { number as num } from "@jasonsbarr/functional-core/lib/number/number.js";
-import { noop } from "@jasonsbarr/functional-core/lib/helpers/noop.js";
-import { identity } from "@jasonsbarr/functional-core/lib/helpers/identity.js";
-import { length } from "@jasonsbarr/functional-core/lib/array/length.js";
-import { join } from "@jasonsbarr/functional-core/lib/array/join.js";
-import { map } from "@jasonsbarr/functional-core/lib/array/map.js";
-import { any } from "@jasonsbarr/iterable/lib/any.js";
 import { List } from "@jasonsbarr/collections/lib/List.js";
 import { env } from "../env/env.js";
 import { Expr, Ident, Lambda, ApplyFn, Let, Letrec } from "./expr.js";
