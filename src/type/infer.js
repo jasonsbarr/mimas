@@ -58,8 +58,8 @@ const getNextVariableName = () => {
 /**
  * type TyVar = {
  *    id: number,
- *    name: string option,
- *    instance: Typ option
+ *    name: string Option,
+ *    instance: Typ Option
  * }
  */
 const TyVar = Record("id", "name", "instance");
