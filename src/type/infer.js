@@ -23,6 +23,7 @@ import { length } from "@jasonsbarr/functional-core/lib/array/length.js";
 import { join } from "@jasonsbarr/functional-core/lib/array/join.js";
 import { map } from "@jasonsbarr/functional-core/lib/array/map.js";
 import { any } from "@jasonsbarr/iterable/lib/any.js";
+import { List } from "@jasonsbarr/collections/lib/List.js";
 import { env } from "../env/env.js";
 import { Expr, Ident, Lambda, ApplyFn, Let, Letrec } from "./expr.js";
 
@@ -72,7 +73,7 @@ const TyVar = Record("id", "name", "instance");
 /**
  * type TyOp = {
  *    name: string,
- *    types: Typ array
+ *    types: Typ List
  * }
  */
 const TyOp = Record("name", "types");
@@ -103,5 +104,5 @@ const makeVariable = () =>
 const nameVariable = ({ value }) =>
   value.name.fold(
     () => TypeVariable({ ...value, name: Some(getNextVariableName()) }),
-    () => TypeVariable({ ...value })
+    () => TypeVariable(value)
   );
